@@ -1,0 +1,68 @@
+using Api.Interfaces;
+using Api.Models;
+using MongoDB.Driver;
+
+namespace Api.Service;
+
+public class CalendarDatesService : BaseGtfsService<CalendarDate>, ICalendarDatesService
+{
+    public CalendarDatesService(IMongoDatabase database, ILogger<CalendarDatesService> logger)
+        : base(database, logger, "calendarDates")
+    {
+    }
+
+    public async Task<List<CalendarDate>> GetAllAsync()
+    {
+        return await _collection.Find(Builders<CalendarDate>.Filter.Empty).ToListAsync();
+    }
+
+    public async Task<List<CalendarDate>> GetByServiceIdAsync(string serviceId)
+    {
+        return await _collection.Find(c => c.ServiceId == serviceId).ToListAsync();
+    }
+
+    public async Task ImportDataAsync(string directoryPath)
+    {
+        string filePath = Path.Combine(directoryPath, "calendar_dates.txt");
+        await ImportFromCsvAsync(filePath, fields => new CalendarDate
+        {
+            Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
+            ServiceId = fields[0],
+            Date = fields[1],
+            ExceptionType = int.Parse(fields[2])
+        });
+    }
+}
+
+public class FareAttributesService : BaseGtfsService<FareAttribute>, IFareAttributesService
+{
+    public FareAttributesService(IMongoDatabase database, ILogger<FareAttributesService> logger)
+        : base(database, logger, "fareAttributes")
+    {
+    }
+
+    public async Task<List<FareAttribute>> GetAllAsync()
+    {
+        return await _collection.Find(Builders<FareAttribute>.Filter.Empty).ToListAsync();
+    }
+
+    public async Task<FareAttribute> GetByIdAsync(string fareId)
+    {
+        return await _collection.Find(f => f.FareId == fareId).FirstOrDefaultAsync();
+    }
+
+    public async Task ImportDataAsync(string directoryPath)
+    {
+        string filePath = Path.Combine(directoryPath, "fare_attributes.txt");
+        await ImportFromCsvAsync(filePath, fields => new FareAttribute
+        {
+            Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
+            FareId = fields[0],
+            Price = decimal.Parse(fields[1], System.Globalization.CultureInfo.InvariantCulture),
+            CurrencyType = fields[2],
+            PaymentMethod = int.Parse(fields[3]),
+            Transfers = int.Parse(fields[4]),
+            TransferDuration = fields.Length > 5 && !string.IsNullOrEmpty(fields[5]) ? int.Parse(fields[5]) : (int?)null
+        });
+    }
+}
