@@ -1,7 +1,7 @@
 # Metro Porto API
 
 ## Descrição
-Metro Porto API serve para fornecer informações sobre o https://www.metrodoporto.pt/
+Metro Porto API serve para fornecer do https://www.metrodoporto.pt/
 A API permite consultar horários, paradas, viagens e próximas partidas do metro.
 
 ## Funcionalidades
@@ -40,7 +40,7 @@ GET /api/metro/trip/{tripId}
 ```bash
 GET /api/metro/upcoming-departures/{stopId}
 ```
-*Retorna as próximas partidas a partir de uma parada específica. Aceita um parâmetro opcional `referenceTime` para consultar partidas a partir de um horário específico.*
+*Retorna as próximas partidas a partir de uma parada específica. Aceita um parâmetro opcional *`referenceTime`* para consultar partidas a partir de um horário específico.*
 
 ## Como Executar
 
@@ -53,7 +53,7 @@ dotnet restore
 ```bash
 dotnet run
 ```
-*A API estará disponível em https://localhost:5001 ou http://localhost:5000*
+*A API estará disponível em* https://localhost:5001 *ou* http://localhost:5000
 
 ### Licença
 [MIT License](https://github.com/rodriaum/metro-porto-api?tab=MIT-1-ov-file#MIT-1-ov-file)
