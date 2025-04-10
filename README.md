@@ -1,7 +1,7 @@
 # Metro Porto API
 
 ## Descrição
-Metro Porto API serve para fornecer do https://www.metrodoporto.pt/
+Metro Porto API (ASP.NET) serve para fornecer do https://www.metrodoporto.pt/
 A API permite consultar horários, paradas, viagens e próximas partidas do metro.
 
 ## Funcionalidades
