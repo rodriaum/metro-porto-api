@@ -26,7 +26,7 @@ O projeto segue uma arquitetura em camadas:
 - **API**: Controladores e endpoints da aplicação
 - **Services**: Lógica de negócios
 - **Models/DTOs**: Objetos de transferência de dados
-- **Repositories**: Acesso a dados (presumivelmente)
+- **Repositories**: Acesso a dados
 
 ## Endpoints Principais
 
