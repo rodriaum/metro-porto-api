@@ -1,7 +1,7 @@
 # Metro Porto API
 
 ## Descrição
-Metro Porto API (ASP.NET) serve para fornecer do https://www.metrodoporto.pt/
+Metro Porto API (ASP.NET) serve para fornecer informações do https://www.metrodoporto.pt/
 A API permite consultar horários, paradas, viagens e próximas partidas do metro.
 
 ## Funcionalidades
@@ -28,23 +28,35 @@ O projeto segue uma arquitetura em camadas:
 - **Models/DTOs**: Objetos de transferência de dados
 - **Repositories**: Acesso a dados
 
-## Endpoints Principais
+## Endpoints Principais (Incompleto)
 
-### Viagens
+### Estações
 ```bash
-GET /api/metro/trip/{tripId}
+GET /v1/porto/metro/stops/
 ```
-*Retorna detalhes de uma viagem específica com suas paradas.*
+```bash
+GET /v1/porto/metro/stops/{stopId}
+```
+*Retorna todas as estações de metro incluindo o id, nome, etc.*
 
-### Próximas Partidas
+### Chegada e Saída de Metros
 ```bash
-GET /api/metro/upcoming-departures/{stopId}
+/v1/porto/metro/stop-times/
 ```
-*Retorna as próximas partidas a partir de uma parada específica. Aceita um parâmetro opcional *`referenceTime`* para consultar partidas a partir de um horário específico.*
+```bash
+/v1/porto/metro/stop-times/stop/{stopId}
+```
+```bash
+/v1/porto/metro/stop-times/trip/{tripId}
+```
+
+*Retorna as próximas partidas a partir de uma parada específica.*
+
+
 
 ## Como Executar
 
-1. Clone o repositório
+. Clone o repositório
 2. Restaure os pacotes NuGet:
 ```bash
 dotnet restore
