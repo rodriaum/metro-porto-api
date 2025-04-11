@@ -56,7 +56,7 @@ GET /v1/porto/metro/stops/{stopId}
 
 ## Como Executar
 
-. Clone o repositório
+1. Clone o repositório
 2. Restaure os pacotes NuGet:
 ```bash
 dotnet restore
