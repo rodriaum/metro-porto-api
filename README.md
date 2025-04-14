@@ -6,11 +6,40 @@ A API permite consultar horários, paradas, viagens e próximas partidas do metr
 
 ## Funcionalidades
 
-- Consulta de paradas de metro
-- Obtenção de detalhes de viagens com suas paradas
-- Consulta de próximas partidas a partir de uma parada específica
-- Referência temporal para consultas de horários
+### Agências
+Consulta de informações das agências do Metro do Porto.
 
+### Calendários de Operação
+Lista de datas e períodos em que os serviços estão ativos (ex: dias úteis, fins de semana, feriados).
+
+### Datas de Calendário
+Exceções ao calendário padrão (inclusões ou exclusões de datas específicas).
+
+### Tarifas
+- Atributos de tarifa (tipo, zona, valor)
+- Regras de aplicação tarifária por rota e horário
+
+### Rotas
+Informações detalhadas sobre linhas do metro, incluindo nomes, cores e trajetos.
+
+### Viagens
+Lista de viagens por rota e calendário, com horários e veículos associados.
+
+### Formas de Trajeto
+Tipos de locomoção envolvidos (ex: metro, caminhada, transferência).
+
+### Paragens (Stops)
+Localização e identificação das estações disponíveis.
+
+### Horários de Paragens
+Lista de horários previstos e reais de chegada e partida em cada paragem.
+
+### Transferências
+Pontos e regras de transbordo entre linhas e rotas.
+
+### Próximas Partidas
+Estimativas em tempo das próximas partidas de uma determinada estação.
+  
 ## Tecnologias Utilizadas
 
 - .NET 8.0
