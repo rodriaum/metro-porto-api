@@ -1,3 +1,4 @@
+using Api.Filter;
 using Api.Interfaces;
 using Api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("v1/porto/metro")]
+[ServiceFilter(typeof(TokenAuthFilter))]
 public class DataController : ControllerBase
 {
     private readonly IGtfsDataService _gtfsDataService;

@@ -1,3 +1,4 @@
+using Api.Filter;
 using Api.Interfaces;
 using Api.Service;
 using Microsoft.OpenApi.Models;
@@ -21,6 +22,8 @@ public class Startup
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Metro do Porto API", Version = "v1" });
         });
+
+        services.AddScoped<TokenAuthFilter>();
 
         // MongoDB configuration
         services.AddSingleton<IMongoClient>(sp =>
