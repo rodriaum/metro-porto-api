@@ -1,5 +1,6 @@
 using MetroPorto.Api.Filter;
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Models;
 using MetroPorto.Api.Service;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
@@ -22,6 +23,8 @@ public class Startup
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Metro do Porto API", Version = "v1" });
         });
+
+        services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
         services.AddScoped<TokenAuthFilter>();
 
