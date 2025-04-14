@@ -1,8 +1,8 @@
-using Api.Interfaces;
+using MetroPorto.Api.Interfaces;
 using MetroPortoAPI.Api;
 using System.IO.Compression;
 
-namespace Api.Service;
+namespace MetroPorto.Api.Service;
 
 public class GtfsFileService : IGtfsFileService
 {

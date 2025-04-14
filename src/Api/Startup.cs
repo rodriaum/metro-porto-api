@@ -1,10 +1,10 @@
-using Api.Filter;
-using Api.Interfaces;
-using Api.Service;
+using MetroPorto.Api.Filter;
+using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Service;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 
-namespace Api;
+namespace MetroPorto.Api;
 
 public class Startup
 {

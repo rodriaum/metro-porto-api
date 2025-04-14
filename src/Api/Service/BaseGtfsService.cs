@@ -1,6 +1,6 @@
 using MongoDB.Driver;
 
-namespace Api.Service;
+namespace MetroPorto.Api.Service;
 
 public abstract class BaseGtfsService<T>
 {

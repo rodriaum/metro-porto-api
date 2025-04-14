@@ -1,8 +1,8 @@
-using Api.Interfaces;
-using Api.Models;
+using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Models;
 using MongoDB.Driver;
 
-namespace Api.Service;
+namespace MetroPorto.Api.Service;
 
 public class ShapesService : BaseGtfsService<Shape>, IShapesService
 {

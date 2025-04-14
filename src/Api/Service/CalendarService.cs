@@ -1,9 +1,9 @@
-﻿using Api.Interfaces;
-using Api.Models;
-using Api.Service;
+﻿using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Models;
+using MetroPorto.Api.Service;
 using MongoDB.Driver;
 
-namespace Api.Service;
+namespace MetroPorto.Api.Service;
 
 public class CalendarService : BaseGtfsService<Calendar>, ICalendarService
 {

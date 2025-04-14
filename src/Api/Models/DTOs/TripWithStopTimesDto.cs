@@ -1,4 +1,4 @@
-namespace Api.Models.DTOs;
+namespace MetroPorto.Api.Models.DTOs;
 
 public class TripWithStopTimesDto
 {

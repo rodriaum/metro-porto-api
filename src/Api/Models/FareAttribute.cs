@@ -1,4 +1,4 @@
-namespace Api.Models;
+namespace MetroPorto.Api.Models;
 
 public class FareAttribute
 {

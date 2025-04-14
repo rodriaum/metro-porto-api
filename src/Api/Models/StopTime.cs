@@ -1,4 +1,4 @@
-namespace Api.Models;
+namespace MetroPorto.Api.Models;
 public class StopTime
 {
     public string Id { get; set; }

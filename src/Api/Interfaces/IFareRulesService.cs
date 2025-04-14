@@ -1,6 +1,6 @@
-using Api.Models;
+using MetroPorto.Api.Models;
 
-namespace Api.Interfaces;
+namespace MetroPorto.Api.Interfaces;
 
 public interface IFareRulesService
 {

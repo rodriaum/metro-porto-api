@@ -1,7 +1,7 @@
-using Api.Interfaces;
+using MetroPorto.Api.Interfaces;
 using MongoDB.Driver;
 
-namespace Api.Service;
+namespace MetroPorto.Api.Service;
 
 public class RoutesService : BaseGtfsService<Api.Models.Route>, IRoutesService
 {
