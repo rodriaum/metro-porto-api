@@ -27,7 +27,7 @@ public class Startup
             new MongoClient(Configuration.GetConnectionString("MongoDB") ?? "mongodb://localhost:27017"));
 
         services.AddSingleton<IMongoDatabase>(sp =>
-            sp.GetRequiredService<IMongoClient>().GetDatabase("metro-porto"));
+            sp.GetRequiredService<IMongoClient>().GetDatabase("metro_porto"));
 
         // Add Data Services
         services.AddSingleton<IGtfsDataService, GtfsDataService>();
