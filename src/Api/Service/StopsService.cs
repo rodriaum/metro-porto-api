@@ -1,10 +1,11 @@
 using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
+using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class StopsService : BaseGtfsService<Stop>, IStopsService
+public class StopsService : MongoService<Stop>, IStopsService
 {
     public StopsService(IMongoDatabase database, ILogger<StopsService> logger)
         : base(database, logger, "stops")

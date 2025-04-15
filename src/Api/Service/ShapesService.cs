@@ -1,10 +1,11 @@
 using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
+using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class ShapesService : BaseGtfsService<Shape>, IShapesService
+public class ShapesService : MongoService<Shape>, IShapesService
 {
     public ShapesService(IMongoDatabase database, ILogger<ShapesService> logger)
         : base(database, logger, "shapes")

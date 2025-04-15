@@ -1,9 +1,10 @@
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class RoutesService : BaseGtfsService<Api.Models.Route>, IRoutesService
+public class RoutesService : MongoService<Api.Models.Route>, IRoutesService
 {
     public RoutesService(IMongoDatabase database, ILogger<RoutesService> logger)
         : base(database, logger, "routes")

@@ -1,11 +1,11 @@
 ﻿using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
-using MetroPorto.Api.Service;
+using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class CalendarService : BaseGtfsService<Calendar>, ICalendarService
+public class CalendarService : MongoService<Calendar>, ICalendarService
 {
     public CalendarService(IMongoDatabase database, ILogger<CalendarService> logger)
         : base(database, logger, "calendar")

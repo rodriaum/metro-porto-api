@@ -1,10 +1,11 @@
 using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
+using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class CalendarDatesService : BaseGtfsService<CalendarDate>, ICalendarDatesService
+public class CalendarDatesService : MongoService<CalendarDate>, ICalendarDatesService
 {
     public CalendarDatesService(IMongoDatabase database, ILogger<CalendarDatesService> logger)
         : base(database, logger, "calendarDates")
@@ -34,7 +35,7 @@ public class CalendarDatesService : BaseGtfsService<CalendarDate>, ICalendarDate
     }
 }
 
-public class FareAttributesService : BaseGtfsService<FareAttribute>, IFareAttributesService
+public class FareAttributesService : MongoService<FareAttribute>, IFareAttributesService
 {
     public FareAttributesService(IMongoDatabase database, ILogger<FareAttributesService> logger)
         : base(database, logger, "fareAttributes")

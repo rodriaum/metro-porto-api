@@ -1,10 +1,11 @@
 using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
+using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class AgencyService : BaseGtfsService<Agency>, IAgencyService
+public class AgencyService : MongoService<Agency>, IAgencyService
 {
     public AgencyService(IMongoDatabase database, ILogger<AgencyService> logger)
         : base(database, logger, "agency")

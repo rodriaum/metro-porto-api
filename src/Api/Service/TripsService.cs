@@ -1,10 +1,11 @@
 using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
+using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class TripsService : BaseGtfsService<Trip>, ITripsService
+public class TripsService : MongoService<Trip>, ITripsService
 {
     public TripsService(IMongoDatabase database, ILogger<TripsService> logger)
         : base(database, logger, "trips")

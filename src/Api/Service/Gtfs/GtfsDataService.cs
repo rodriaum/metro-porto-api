@@ -1,8 +1,9 @@
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Interfaces.Gtfs;
 using MetroPorto.Api.Models;
 using MongoDB.Driver;
 
-namespace MetroPorto.Api.Service;
+namespace MetroPorto.Api.Service.Gtfs;
 
 public class GtfsDataService : IGtfsDataService
 {

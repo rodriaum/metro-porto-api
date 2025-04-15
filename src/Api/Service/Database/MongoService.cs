@@ -1,13 +1,13 @@
 using MongoDB.Driver;
 
-namespace MetroPorto.Api.Service;
+namespace MetroPorto.Api.Service.Database;
 
-public abstract class BaseGtfsService<T>
+public abstract class MongoService<T>
 {
     protected readonly IMongoCollection<T> _collection;
     protected readonly ILogger _logger;
 
-    protected BaseGtfsService(IMongoDatabase database, ILogger logger, string collectionName)
+    protected MongoService(IMongoDatabase database, ILogger logger, string collectionName)
     {
         _collection = database.GetCollection<T>(collectionName);
         _logger = logger;

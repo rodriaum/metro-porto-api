@@ -1,4 +1,4 @@
-namespace MetroPorto.Api.Interfaces;
+namespace MetroPorto.Api.Interfaces.Gtfs;
 
 public interface IGtfsFileService
 {

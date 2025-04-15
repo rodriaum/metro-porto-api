@@ -1,10 +1,11 @@
 using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
+using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class TransfersService : BaseGtfsService<Transfer>, ITransfersService
+public class TransfersService : MongoService<Transfer>, ITransfersService
     {
         public TransfersService(IMongoDatabase database, ILogger<TransfersService> logger)
             : base(database, logger, "transfers")

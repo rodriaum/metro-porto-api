@@ -1,10 +1,11 @@
 using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
+using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class FareRulesService : BaseGtfsService<FareRule>, IFareRulesService
+public class FareRulesService : MongoService<FareRule>, IFareRulesService
 {
     public FareRulesService(IMongoDatabase database, ILogger<FareRulesService> logger)
         : base(database, logger, "fareRules")

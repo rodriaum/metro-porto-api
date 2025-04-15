@@ -1,4 +1,4 @@
-﻿namespace MetroPortoAPI.Api;
+﻿namespace MetroPorto.Api;
 
 public class Constant
 {

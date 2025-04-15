@@ -2,6 +2,8 @@ using MetroPorto.Api.Filter;
 using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
 using MetroPorto.Api.Service;
+using MetroPorto.Api.Interfaces.Gtfs;
+using MetroPorto.Api.Service.Gtfs;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 

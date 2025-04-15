@@ -1,6 +1,6 @@
 using MetroPorto.Api.Filter;
-using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
+using MetroPorto.Api.Interfaces.Gtfs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MetroPorto.Api.Controllers;
