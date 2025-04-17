@@ -6,7 +6,7 @@ A API permite consultar horários, paradas, viagens e próximas partidas do metr
 
 ## Docs
 
-Você pode acessar os documentos da API por [aqui](metro-porto.gitbook.io/metro-porto).
+Você pode acessar os documentos da API por [aqui](https://metro-porto.gitbook.io/metro-porto).
 
 ## Funcionalidades
 
