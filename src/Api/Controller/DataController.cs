@@ -1,13 +1,12 @@
 using MetroPorto.Api.Filter;
-using MetroPorto.Api.Models;
 using MetroPorto.Api.Interfaces.Gtfs;
+using MetroPorto.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MetroPorto.Api.Controllers;
 
 [ApiController]
 [Route("v1/porto/metro")]
-[ServiceFilter(typeof(TokenAuthFilter))]
 public class DataController : ControllerBase
 {
     private readonly IGtfsDataService _gtfsDataService;
@@ -20,6 +19,7 @@ public class DataController : ControllerBase
     }
 
     [HttpPost("reload-data")]
+    [ServiceFilter(typeof(TokenAuthFilter))]
     public async Task<IActionResult> ReloadData()
     {
         try
@@ -33,5 +33,12 @@ public class DataController : ControllerBase
             _logger.LogError(ex, "Erro ao recarregar dados");
             return StatusCode(500, new { message = "Erro ao carregar dados", error = ex.Message });
         }
+    }
+
+
+    [HttpGet("version")]
+    public IActionResult GetVersion()
+    {
+        return Ok(Constant.Version);
     }
 }
