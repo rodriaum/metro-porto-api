@@ -18,7 +18,7 @@ public class InfoController : ControllerBase
     {
         return Ok(new
         {
-            status = "active",
+            status = "API is active",
             healthy = true,
             timestamp = DateTime.UtcNow
         });
