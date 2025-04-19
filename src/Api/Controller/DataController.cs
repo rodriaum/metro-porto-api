@@ -34,11 +34,4 @@ public class DataController : ControllerBase
             return StatusCode(500, new { message = "Erro ao carregar dados", error = ex.Message });
         }
     }
-
-
-    [HttpGet("version")]
-    public IActionResult GetVersion()
-    {
-        return Ok(Constant.Version);
-    }
 }
