@@ -1,4 +1,6 @@
 ﻿using MetroPorto.Api.Models;
+using MetroPorto.Api.Service.Database;
+using MetroPortoAPI.Api.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MetroPorto.Api.Controllers;
@@ -18,7 +20,7 @@ public class InfoController : ControllerBase
     {
         return Ok(new
         {
-            status = "API is active",
+            status = Status.Active.ToString().ToLower(),
             healthy = true,
             timestamp = DateTime.UtcNow
         });
