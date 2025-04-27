@@ -1,4 +1,5 @@
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Interfaces.Database;
 using MetroPorto.Api.Models;
 using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
@@ -7,9 +8,12 @@ namespace MetroPorto.Api.Service;
 
 public class CalendarDatesService : MongoService<CalendarDate>, ICalendarDatesService
 {
-    public CalendarDatesService(IMongoDatabase database, ILogger<CalendarDatesService> logger)
-        : base(database, logger, "calendarDates")
+    private readonly IRedisService _redis;
+
+    public CalendarDatesService(IMongoDatabase database, ILogger<CalendarDatesService> logger, IRedisService redis)
+        : base(database, logger, "calendar_dates")
     {
+        _redis = redis;
     }
 
     public async Task<List<CalendarDate>> GetAllAsync()

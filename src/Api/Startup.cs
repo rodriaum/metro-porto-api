@@ -1,11 +1,16 @@
 using MetroPorto.Api.Filter;
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Interfaces.Database;
+using MetroPorto.Api.Interfaces.Gtfs;
 using MetroPorto.Api.Models;
 using MetroPorto.Api.Service;
-using MetroPorto.Api.Interfaces.Gtfs;
+using MetroPorto.Api.Service.Database;
 using MetroPorto.Api.Service.Gtfs;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using System.Threading.RateLimiting;
 
 namespace MetroPorto.Api;
 
@@ -20,7 +25,46 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddControllers();
+        ConfigureInfrastructureServices(services);
+        ConfigureDatabaseServices(services);
+        ConfigureCacheServices(services);
+        ConfigureApplicationServices(services);
+    }
+
+    private void ConfigureInfrastructureServices(IServiceCollection services)
+    {
+        services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+            options.Providers.Add<GzipCompressionProvider>();
+        });
+
+        services.AddRateLimiter(options =>
+        {
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? httpContext.Request.Headers.Host.ToString(),
+                    factory: partition => new FixedWindowRateLimiterOptions
+                    {
+                        AutoReplenishment = true,
+                        PermitLimit = 100,
+                        QueueLimit = 0,
+                        Window = TimeSpan.FromSeconds(1)
+                    }));
+        });
+
+        services.AddControllers(options =>
+        {
+            options.CacheProfiles.Add("Default", new CacheProfile
+            {
+                Duration = 60,
+                Location = ResponseCacheLocation.Any
+            });
+        });
+
+        services.AddResponseCaching();
+
+        // Swagger
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Metro do Porto API", Version = "v1" });
@@ -30,15 +74,60 @@ public class Startup
 
         services.AddScoped<TokenAuthFilter>();
 
-        // MongoDB configuration
+        services.AddHttpClient();
+    }
+
+    private void ConfigureDatabaseServices(IServiceCollection services)
+    {
+        // MongoDB
         services.AddSingleton<IMongoClient>(sp =>
-            new MongoClient(Configuration.GetConnectionString("MongoDB") ?? "mongodb://localhost:27017"));
+        {
+            string? connection = Configuration.GetConnectionString("MongoDB");
+
+            if (string.IsNullOrWhiteSpace(connection))
+            {
+                connection = "mongodb://localhost:27017";
+                Console.WriteLine("MongoDB connection string not found in configuration.");
+            }
+
+            MongoClientSettings settings = MongoClientSettings.FromConnectionString(connection);
+
+            settings.MaxConnectionPoolSize = 1000;
+            settings.MinConnectionPoolSize = 10;
+            settings.WaitQueueSize = 10000;
+
+            return new MongoClient(connection);
+        });
 
         services.AddSingleton<IMongoDatabase>(sp =>
             sp.GetRequiredService<IMongoClient>().GetDatabase("metro_porto"));
+    }
 
-        // Add Data Services
+    private void ConfigureCacheServices(IServiceCollection services)
+    {
+        // Redis
+        services.AddStackExchangeRedisCache(options =>
+        {
+            string? connection = Configuration.GetConnectionString("Redis");
+
+            if (string.IsNullOrWhiteSpace(connection))
+            {
+                connection = "localhost:6379,abortConnect=false";
+                Console.WriteLine("Redis connection string not found in configuration.");
+            }
+
+            options.Configuration = connection;
+            options.InstanceName = $"{Constant.Name.Replace(" ", "-").ToLower()}:";
+        });
+
+        services.AddSingleton<IRedisService, RedisService>();
+    }
+
+    private void ConfigureApplicationServices(IServiceCollection services)
+    {
         services.AddSingleton<IGtfsDataService, GtfsDataService>();
+        services.AddSingleton<IGtfsFileService, GtfsFileService>();
+
         services.AddSingleton<IAgencyService, AgencyService>();
         services.AddSingleton<ICalendarService, CalendarService>();
         services.AddSingleton<ICalendarDatesService, CalendarDatesService>();
@@ -50,12 +139,6 @@ public class Startup
         services.AddSingleton<IStopTimesService, StopTimesService>();
         services.AddSingleton<ITransfersService, TransfersService>();
         services.AddSingleton<ITripsService, TripsService>();
-
-        // Add File Download Service
-        services.AddSingleton<IGtfsFileService, GtfsFileService>();
-
-        // Add HttpClient for downloading GTFS data
-        services.AddHttpClient();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<Startup> logger)
@@ -71,13 +154,20 @@ public class Startup
         app.UseHttpsRedirection();
         app.UseRouting();
         app.UseAuthorization();
+        app.UseResponseCaching();
+        app.UseResponseCompression();
+        app.UseRateLimiter();
 
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
         });
 
-        // Initialize database
+        InitializeDatabase(serviceProvider, logger);
+    }
+
+    private void InitializeDatabase(IServiceProvider serviceProvider, ILogger<Startup> logger)
+    {
         var gtfsDataService = serviceProvider.GetRequiredService<IGtfsDataService>();
 
         try

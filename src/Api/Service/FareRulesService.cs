@@ -8,7 +8,7 @@ namespace MetroPorto.Api.Service;
 public class FareRulesService : MongoService<FareRule>, IFareRulesService
 {
     public FareRulesService(IMongoDatabase database, ILogger<FareRulesService> logger)
-        : base(database, logger, "fareRules")
+        : base(database, logger, "fare_rules")
     {
     }
 

@@ -1,4 +1,5 @@
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Interfaces.Database;
 using MetroPorto.Api.Models;
 using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
@@ -7,9 +8,12 @@ namespace MetroPorto.Api.Service;
 
 public class AgencyService : MongoService<Agency>, IAgencyService
 {
-    public AgencyService(IMongoDatabase database, ILogger<AgencyService> logger)
+    private readonly IRedisService _redis;
+
+    public AgencyService(IMongoDatabase database, ILogger<AgencyService> logger, IRedisService redis)
         : base(database, logger, "agency")
     {
+        _redis = redis;
     }
 
     public async Task<List<Agency>> GetAllAsync()
@@ -32,7 +36,7 @@ public class AgencyService : MongoService<Agency>, IAgencyService
             AgencyName = fields[1],
             AgencyUrl = fields[2],
             AgencyTimezone = fields[3],
-            AgencyLang = fields.Length > 4 ? fields[4] : null
+            AgencyLang = fields.Length > 4 ? fields[4] : ""
         });
     }
 }

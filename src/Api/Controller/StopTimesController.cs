@@ -28,8 +28,8 @@ public class StopTimesController : ControllerBase
     }
 
     [HttpGet("stop-times/stop/{stopId}")]
-    public async Task<ActionResult<List<StopTime>>> GetByStopId(string stopId)
+    public async Task<ActionResult<List<StopTime>>> GetByStopId(string stopId, [FromQuery] int page = 1, [FromQuery] int pageSize = 100)
     {
-        return await _stopTimesService.GetByStopIdAsync(stopId);
+        return await _stopTimesService.GetByStopIdAsync(stopId, page, pageSize);
     }
 }

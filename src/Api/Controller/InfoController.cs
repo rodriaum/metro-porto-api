@@ -1,5 +1,4 @@
 ﻿using MetroPorto.Api.Models;
-using MetroPorto.Api.Service.Database;
 using MetroPortoAPI.Api.Enums;
 using Microsoft.AspNetCore.Mvc;
 
