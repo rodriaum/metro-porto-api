@@ -3,10 +3,11 @@ using MetroPorto.Api.Interfaces.Gtfs;
 using MetroPorto.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MetroPorto.Api.Controllers;
+namespace MetroPortoAPI.Api.Controller.System;
 
 [ApiController]
 [Route("v1/porto/metro")]
+[ServiceFilter(typeof(TokenAuthFilter))]
 public class DataController : ControllerBase
 {
     private readonly IGtfsDataService _gtfsDataService;
@@ -19,7 +20,6 @@ public class DataController : ControllerBase
     }
 
     [HttpPost("reload-data")]
-    [ServiceFilter(typeof(TokenAuthFilter))]
     public async Task<IActionResult> ReloadData()
     {
         try

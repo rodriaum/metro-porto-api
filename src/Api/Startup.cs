@@ -86,6 +86,7 @@ public class Startup
 
             if (string.IsNullOrWhiteSpace(connection))
             {
+                // dev test
                 connection = "mongodb://localhost:27017";
                 Console.WriteLine("MongoDB connection string not found in configuration.");
             }
@@ -112,6 +113,7 @@ public class Startup
 
             if (string.IsNullOrWhiteSpace(connection))
             {
+                // dev test
                 connection = "localhost:6379,abortConnect=false";
                 Console.WriteLine("Redis connection string not found in configuration.");
             }
@@ -170,6 +172,7 @@ public class Startup
     {
         var gtfsDataService = serviceProvider.GetRequiredService<IGtfsDataService>();
 
+        // Bomb code :)
         try
         {
             gtfsDataService.InitializeAsync().Wait();
