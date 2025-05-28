@@ -1,41 +1,53 @@
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Interfaces.Database;
 using MetroPorto.Api.Service.Database;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace MetroPorto.Api.Service;
 
-public class RoutesService : MongoService<Api.Models.Route>, IRoutesService
+public class RoutesService : MongoService<Models.Route>, IRoutesService
 {
-    public RoutesService(IMongoDatabase database, ILogger<RoutesService> logger)
+    private readonly IRedisService _redis;
+
+    public RoutesService(IMongoDatabase database, ILogger<RoutesService> logger, IRedisService redis)
         : base(database, logger, "routes")
     {
+        _redis = redis;
+
+        IndexKeysDefinition<Models.Route> indexKeysDefinition = Builders<Models.Route>.IndexKeys.Ascending(r => r.RouteId);
+        _collection.Indexes.CreateOne(new CreateIndexModel<Models.Route>(indexKeysDefinition));
     }
 
-    public async Task<List<Api.Models.Route>> GetAllAsync()
+    public async Task<List<Models.Route>> GetAllAsync()
     {
-        return await _collection.Find(Builders<Api.Models.Route>.Filter.Empty).ToListAsync();
+        return await _collection.Find(Builders<Models.Route>.Filter.Empty).ToListAsync();
     }
 
-    public async Task<Api.Models.Route> GetByIdAsync(string routeId)
+    public async Task<Models.Route?> GetByIdAsync(string routeId)
     {
-        return await _collection.Find(r => r.RouteId == routeId).FirstOrDefaultAsync();
+        return await _redis.GetOrSetAsync(
+            $"route-{routeId}",
+            async () => await _collection.Find(r => r.RouteId == routeId).FirstOrDefaultAsync()
+        );
     }
 
     public async Task ImportDataAsync(string directoryPath)
     {
         string filePath = Path.Combine(directoryPath, "routes.txt");
-        await ImportFromCsvAsync(filePath, fields => new Api.Models.Route
+
+        await ImportFromCsvAsync(filePath, fields => new Models.Route
         {
-            Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
+            Id = ObjectId.GenerateNewId().ToString(),
             RouteId = fields[0],
-            AgencyId = fields.Length > 1 ? fields[1] : null,
-            RouteShortName = fields.Length > 2 ? fields[2] : null,
-            RouteLongName = fields.Length > 3 ? fields[3] : null,
-            RouteDesc = fields.Length > 4 ? fields[4] : null,
+            AgencyId = fields.Length > 1 ? fields[1] : "",
+            RouteShortName = fields.Length > 2 ? fields[2] : "",
+            RouteLongName = fields.Length > 3 ? fields[3] : "",
+            RouteDesc = fields.Length > 4 ? fields[4] : "",
             RouteType = int.Parse(fields[5]),
-            RouteUrl = fields.Length > 6 ? fields[6] : null,
-            RouteColor = fields.Length > 7 ? fields[7] : null,
-            RouteTextColor = fields.Length > 8 ? fields[8] : null
+            RouteUrl = fields.Length > 6 ? fields[6] : "",
+            RouteColor = fields.Length > 7 ? fields[7] : "",
+            RouteTextColor = fields.Length > 8 ? fields[8] : ""
         });
     }
 }

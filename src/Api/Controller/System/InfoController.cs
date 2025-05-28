@@ -1,9 +1,9 @@
 ﻿using MetroPorto.Api;
 using MetroPorto.Api.Models;
-using MetroPortoAPI.Api.Enums;
+using MetroPorto.Api.Enums;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MetroPortoAPI.Api.Controller.System;
+namespace MetroPorto.Api.Controller.System;
 
 [ApiController]
 [Route("v1/porto/metro")]

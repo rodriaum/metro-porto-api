@@ -1,4 +1,5 @@
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Interfaces.Database;
 using MetroPorto.Api.Models;
 using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
@@ -7,9 +8,15 @@ namespace MetroPorto.Api.Service;
 
 public class ShapesService : MongoService<Shape>, IShapesService
 {
-    public ShapesService(IMongoDatabase database, ILogger<ShapesService> logger)
+    private readonly IRedisService _redis;
+
+    public ShapesService(IMongoDatabase database, ILogger<ShapesService> logger, IRedisService redis)
         : base(database, logger, "shapes")
     {
+        _redis = redis;
+
+        IndexKeysDefinition<Shape> indexKeysDefinition = Builders<Shape>.IndexKeys.Ascending(s => s.ShapeId);
+        _collection.Indexes.CreateOne(new CreateIndexModel<Shape>(indexKeysDefinition));
     }
 
     public async Task<List<Shape>> GetAllAsync()
@@ -17,14 +24,18 @@ public class ShapesService : MongoService<Shape>, IShapesService
         return await _collection.Find(Builders<Shape>.Filter.Empty).ToListAsync();
     }
 
-    public async Task<List<Shape>> GetByShapeIdAsync(string shapeId)
+    public async Task<List<Shape>?> GetByShapeIdAsync(string shapeId)
     {
-        return await _collection.Find(s => s.ShapeId == shapeId).ToListAsync();
+        return await _redis.GetOrSetAsync(
+            $"shapes-{shapeId}",
+            async () => await _collection.Find(s => s.ShapeId == shapeId).ToListAsync()
+        );
     }
 
     public async Task ImportDataAsync(string directoryPath)
     {
         string filePath = Path.Combine(directoryPath, "shapes.txt");
+
         await ImportFromCsvAsync(filePath, fields => new Shape
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),

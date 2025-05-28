@@ -1,7 +1,9 @@
+using AspNetCoreRateLimit;
 using MetroPorto.Api.Filter;
 using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Interfaces.Database;
 using MetroPorto.Api.Interfaces.Gtfs;
+using MetroPorto.Api.Middleware;
 using MetroPorto.Api.Models;
 using MetroPorto.Api.Service;
 using MetroPorto.Api.Service.Database;
@@ -10,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
-using System.Threading.RateLimiting;
 
 namespace MetroPorto.Api;
 
@@ -25,10 +26,23 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        ConfigureProtectionServices(services);
         ConfigureInfrastructureServices(services);
         ConfigureDatabaseServices(services);
         ConfigureCacheServices(services);
         ConfigureApplicationServices(services);
+    }
+
+    private void ConfigureProtectionServices(IServiceCollection services)
+    {
+        services.AddMemoryCache();
+        services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
+        services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
+        services.AddInMemoryRateLimiting();
+        services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+        services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+        services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
+        services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
     }
 
     private void ConfigureInfrastructureServices(IServiceCollection services)
@@ -37,20 +51,6 @@ public class Startup
         {
             options.EnableForHttps = true;
             options.Providers.Add<GzipCompressionProvider>();
-        });
-
-        services.AddRateLimiter(options =>
-        {
-            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-                RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? httpContext.Request.Headers.Host.ToString(),
-                    factory: partition => new FixedWindowRateLimiterOptions
-                    {
-                        AutoReplenishment = true,
-                        PermitLimit = 100,
-                        QueueLimit = 0,
-                        Window = TimeSpan.FromSeconds(1)
-                    }));
         });
 
         services.AddControllers(options =>
@@ -143,22 +143,49 @@ public class Startup
         services.AddSingleton<ITripsService, TripsService>();
     }
 
+    public void ConfigureSecurityHeaders(IApplicationBuilder app)
+    {
+        app.Use(async (context, next) =>
+        {
+            context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+            context.Response.Headers.Add("X-Frame-Options", "DENY");
+            context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+            context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
+            context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'");
+
+            context.Response.Headers.Remove("Server");
+            context.Response.Headers.Remove("X-Powered-By");
+
+            await next();
+        });
+    }
+
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<Startup> logger)
     {
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
         }
+        else
+        {
+            app.UseExceptionHandler("/error");
+            app.UseHsts();
+        }
+
+        ConfigureSecurityHeaders(app);
 
         app.UseSwagger();
         app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Metro do Porto API v1"));
+
+        app.UseMiddleware<BlacklistMiddleware>();
+        app.UseMiddleware<ProtectionMiddleware>();
+        app.UseIpRateLimiting();
 
         app.UseHttpsRedirection();
         app.UseRouting();
         app.UseAuthorization();
         app.UseResponseCaching();
         app.UseResponseCompression();
-        app.UseRateLimiter();
 
         app.UseEndpoints(endpoints =>
         {

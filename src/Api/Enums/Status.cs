@@ -1,4 +1,4 @@
-﻿namespace MetroPortoAPI.Api.Enums;
+﻿namespace MetroPorto.Api.Enums;
 
 public enum Status
 {

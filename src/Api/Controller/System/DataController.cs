@@ -3,7 +3,7 @@ using MetroPorto.Api.Interfaces.Gtfs;
 using MetroPorto.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MetroPortoAPI.Api.Controller.System;
+namespace MetroPorto.Api.Controller.System;
 
 [ApiController]
 [Route("v1/porto/metro")]

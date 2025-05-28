@@ -16,8 +16,20 @@ public class Program
                 {
                     options.Limits.MaxConcurrentConnections = 10000;
                     options.Limits.MaxConcurrentUpgradedConnections = 10000;
-                    options.Limits.MaxRequestBodySize = 10 * 1024;
+                    options.Limits.MaxRequestBodySize = 10 * 1024; // 10 KB
                     options.Limits.MinRequestBodyDataRate = null;
+                    options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+
+                    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
                 });
+            })
+            .ConfigureLogging((hostingContext, logging) =>
+            {
+                logging.ClearProviders();
+                logging.AddConsole();
+                logging.AddDebug();
+
+                logging.AddFilter("Microsoft.AspNetCore.HttpOverrides", LogLevel.Warning);
+                logging.AddFilter("MetroPorto.Api.Middleware", LogLevel.Warning);
             });
 }

@@ -14,6 +14,9 @@ public class AgencyService : MongoService<Agency>, IAgencyService
         : base(database, logger, "agency")
     {
         _redis = redis;
+
+        IndexKeysDefinition<Agency> indexKeysDefinition = Builders<Agency>.IndexKeys.Ascending(a => a.AgencyId);
+        _collection.Indexes.CreateOne(new CreateIndexModel<Agency>(indexKeysDefinition));
     }
 
     public async Task<List<Agency>> GetAllAsync()
@@ -21,9 +24,12 @@ public class AgencyService : MongoService<Agency>, IAgencyService
         return await _collection.Find(Builders<Agency>.Filter.Empty).ToListAsync();
     }
 
-    public async Task<Agency> GetByIdAsync(string agencyId)
+    public async Task<Agency?> GetByIdAsync(string agencyId)
     {
-        return await _collection.Find(a => a.AgencyId == agencyId).FirstOrDefaultAsync();
+        return await _redis.GetOrSetAsync(
+            $"agency-{agencyId}",
+            async () => await _collection.Find(a => a.AgencyId == agencyId).FirstOrDefaultAsync()
+        );
     }
 
     public async Task ImportDataAsync(string directoryPath)

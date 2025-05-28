@@ -1,4 +1,5 @@
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Interfaces.Database;
 using MetroPorto.Api.Models;
 using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
@@ -7,9 +8,15 @@ namespace MetroPorto.Api.Service;
 
 public class StopsService : MongoService<Stop>, IStopsService
 {
-    public StopsService(IMongoDatabase database, ILogger<StopsService> logger)
+    private readonly IRedisService _redis;
+
+    public StopsService(IMongoDatabase database, ILogger<StopsService> logger, IRedisService redis)
         : base(database, logger, "stops")
     {
+        _redis = redis;
+
+        IndexKeysDefinition<Stop> indexKeysDefinition = Builders<Stop>.IndexKeys.Ascending(s => s.StopId);
+        _collection.Indexes.CreateOne(new CreateIndexModel<Stop>(indexKeysDefinition));
     }
 
     public async Task<List<Stop>> GetAllAsync()
@@ -17,9 +24,12 @@ public class StopsService : MongoService<Stop>, IStopsService
         return await _collection.Find(Builders<Stop>.Filter.Empty).ToListAsync();
     }
 
-    public async Task<Stop> GetByIdAsync(string stopId)
+    public async Task<Stop?> GetByIdAsync(string stopId)
     {
-        return await _collection.Find(s => s.StopId == stopId).FirstOrDefaultAsync();
+        return await _redis.GetOrSetAsync(
+            $"stop-{stopId}",
+            async () => await _collection.Find(s => s.StopId == stopId).FirstOrDefaultAsync()
+        );
     }
 
     public async Task ImportDataAsync(string directoryPath)
@@ -29,13 +39,13 @@ public class StopsService : MongoService<Stop>, IStopsService
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
             StopId = fields[0],
-            StopCode = fields.Length > 1 ? fields[1] : null,
-            StopName = fields.Length > 2 ? fields[2] : null,
-            StopDesc = fields.Length > 3 ? fields[3] : null,
+            StopCode = fields.Length > 1 ? fields[1] : "",
+            StopName = fields.Length > 2 ? fields[2] : "",
+            StopDesc = fields.Length > 3 ? fields[3] : "",
             StopLat = double.Parse(fields[4], System.Globalization.CultureInfo.InvariantCulture),
             StopLon = double.Parse(fields[5], System.Globalization.CultureInfo.InvariantCulture),
-            ZoneId = fields.Length > 6 ? fields[6] : null,
-            StopUrl = fields.Length > 7 ? fields[7] : null
+            ZoneId = fields.Length > 6 ? fields[6] : "",
+            StopUrl = fields.Length > 7 ? fields[7] : ""
         });
     }
 }

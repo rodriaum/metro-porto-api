@@ -14,6 +14,9 @@ public class CalendarDatesService : MongoService<CalendarDate>, ICalendarDatesSe
         : base(database, logger, "calendar_dates")
     {
         _redis = redis;
+
+        IndexKeysDefinition<CalendarDate> indexKeysDefinition = Builders<CalendarDate>.IndexKeys.Ascending(c => c.ServiceId);
+        _collection.Indexes.CreateOne(new CreateIndexModel<CalendarDate>(indexKeysDefinition));
     }
 
     public async Task<List<CalendarDate>> GetAllAsync()
@@ -21,9 +24,12 @@ public class CalendarDatesService : MongoService<CalendarDate>, ICalendarDatesSe
         return await _collection.Find(Builders<CalendarDate>.Filter.Empty).ToListAsync();
     }
 
-    public async Task<List<CalendarDate>> GetByServiceIdAsync(string serviceId)
+    public async Task<List<CalendarDate>?> GetByServiceIdAsync(string serviceId)
     {
-        return await _collection.Find(c => c.ServiceId == serviceId).ToListAsync();
+        return await _redis.GetOrSetAsync(
+            $"calendar-dates-service-{serviceId}",
+            async () => await _collection.Find(c => c.ServiceId == serviceId).ToListAsync()
+        ) ?? new List<CalendarDate>();
     }
 
     public async Task ImportDataAsync(string directoryPath)

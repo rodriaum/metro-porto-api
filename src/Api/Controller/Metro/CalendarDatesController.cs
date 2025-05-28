@@ -2,7 +2,7 @@ using MetroPorto.Api.Interfaces;
 using MetroPorto.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MetroPortoAPI.Api.Controller.Metro;
+namespace MetroPorto.Api.Controller.Metro;
 
 [ApiController]
 [Route("v1/porto/metro")]

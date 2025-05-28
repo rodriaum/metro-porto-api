@@ -22,27 +22,30 @@ public class StopTimesService : MongoService<StopTime>, IStopTimesService
         _collection.Indexes.CreateOne(new CreateIndexModel<StopTime>(indexKeysDefinition));
     }
 
-    public async Task<List<StopTime>> GetAllAsync()
+    public async Task<List<StopTime>> GetAllAsync(int page = 1, int pageSize = 100)
     {
-        return await _redis.GetOrSetAsync(
-            "stop-times-all",
-            async () => await _collection.Find(_ => true).ToListAsync()
-        ) ?? new List<StopTime>();
+        int skip = (page - 1) * pageSize;
+
+        return await _collection.Find(_ => true)
+                                .Skip(skip)
+                                .Limit(pageSize)
+                                .ToListAsync();
     }
 
-    public async Task<List<StopTime>> GetByTripIdAsync(string tripId)
+    public async Task<List<StopTime>?> GetByTripIdAsync(string tripId)
     {
         return await _redis.GetOrSetAsync(
             $"stop-times-trip-{tripId}",
             async () => await _collection.Find(st => st.TripId == tripId).ToListAsync()
-        ) ?? new List<StopTime>();
+        );
     }
 
     public async Task<List<StopTime>> GetByStopIdAsync(string stopId, int page = 1, int pageSize = 100)
     {
         return await _redis.GetOrSetAsync(
             $"stop-times-stop-{stopId}-{page}-{pageSize}",
-            async () => {
+            async () =>
+            {
                 var skip = (page - 1) * pageSize;
                 return await _collection.Find(st => st.StopId == stopId)
                                         .Skip(skip)

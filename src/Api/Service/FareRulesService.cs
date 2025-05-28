@@ -1,4 +1,5 @@
 using MetroPorto.Api.Interfaces;
+using MetroPorto.Api.Interfaces.Database;
 using MetroPorto.Api.Models;
 using MetroPorto.Api.Service.Database;
 using MongoDB.Driver;
@@ -7,9 +8,12 @@ namespace MetroPorto.Api.Service;
 
 public class FareRulesService : MongoService<FareRule>, IFareRulesService
 {
-    public FareRulesService(IMongoDatabase database, ILogger<FareRulesService> logger)
+    private readonly IRedisService _redis;
+
+    public FareRulesService(IMongoDatabase database, ILogger<FareRulesService> logger, IRedisService redis)
         : base(database, logger, "fare_rules")
     {
+        this._redis = redis;
     }
 
     public async Task<List<FareRule>> GetAllAsync()
