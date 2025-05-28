@@ -24,7 +24,8 @@ public class AgencyController : ControllerBase
     [HttpGet("agencies/{id}")]
     public async Task<ActionResult<Agency>> GetById(string id)
     {
-        var agency = await _agencyService.GetByIdAsync(id);
+        Agency? agency = await _agencyService.GetByIdAsync(id);
+
         if (agency == null)
             return NotFound();
 

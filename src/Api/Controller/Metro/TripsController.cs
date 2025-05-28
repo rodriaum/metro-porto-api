@@ -16,15 +16,16 @@ public class TripsController : ControllerBase
     }
 
     [HttpGet("trips")]
-    public async Task<ActionResult<List<Trip>>> GetAll()
+    public async Task<ActionResult<List<Trip>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 100)
     {
-        return await _tripsService.GetAllAsync();
+        return await _tripsService.GetAllAsync(page, pageSize);
     }
 
     [HttpGet("trips/{id}")]
     public async Task<ActionResult<Trip>> GetById(string id)
     {
-        var trip = await _tripsService.GetByIdAsync(id);
+        Trip? trip = await _tripsService.GetByIdAsync(id);
+
         if (trip == null)
             return NotFound();
 
@@ -32,8 +33,13 @@ public class TripsController : ControllerBase
     }
 
     [HttpGet("trips/route/{routeId}")]
-    public async Task<ActionResult<List<Trip>>> GetByRouteId(string routeId)
+    public async Task<ActionResult<List<Trip>?>> GetByRouteId(string routeId, [FromQuery] int page = 1, [FromQuery] int pageSize = 100)
     {
-        return await _tripsService.GetByRouteIdAsync(routeId);
+        List<Trip>? trips = await _tripsService.GetByRouteIdAsync(routeId, page, pageSize);
+
+        if (trips == null)
+            return NotFound();
+
+        return trips;
     }
 }

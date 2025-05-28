@@ -34,11 +34,15 @@ public class MetroController : ControllerBase
     {
         try
         {
-            var route = await _routesService.GetByIdAsync(routeId);
-            if (route == null)
-                return NotFound(new { message = $"Rota com ID {routeId} não encontrada" });
+            Models.Route? route = await _routesService.GetByIdAsync(routeId);
 
-            var trips = await _tripsService.GetByRouteIdAsync(routeId);
+            if (route == null)
+                return NotFound(new { message = $"Route with ID {routeId} not found" });
+
+            List<Trip>? trips = await _tripsService.GetByRouteIdAsync(routeId);
+
+            if (trips == null || trips.Count == 0)
+                return NotFound(new { message = $"No trips found for route with ID {routeId}" });
 
             return new RouteWithTripsDto
             {
@@ -48,8 +52,8 @@ public class MetroController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Erro ao buscar rota com viagens: {routeId}");
-            return StatusCode(500, new { message = "Erro ao processar requisição", error = ex.Message });
+            _logger.LogError(ex, $"Error fetching route with trips: {routeId}");
+            return StatusCode(500, new { message = "Error processing request", error = ex.Message });
         }
     }
 
@@ -58,16 +62,23 @@ public class MetroController : ControllerBase
     {
         try
         {
-            var trip = await _tripsService.GetByIdAsync(tripId);
-            if (trip == null)
-                return NotFound(new { message = $"Viagem com ID {tripId} não encontrada" });
+            Trip? trip = await _tripsService.GetByIdAsync(tripId);
 
-            var stopTimes = await _stopTimesService.GetByTripIdAsync(tripId);
-            var stopTimesWithStops = new List<StopTimeWithStopDto>();
+            if (trip == null)
+                return NotFound(new { message = $"Trip with ID {tripId} not found" });
+
+            List<StopTime>? stopTimes = await _stopTimesService.GetByTripIdAsync(tripId);
+
+            if (stopTimes == null || !stopTimes.Any())
+                return NotFound(new { message = $"No stop times found for trip {tripId}" });
+
+            List<StopTimeWithStopDto> stopTimesWithStops = new();
 
             foreach (var stopTime in stopTimes.OrderBy(st => st.StopSequence))
             {
-                var stop = await _stopsService.GetByIdAsync(stopTime.StopId);
+                Stop? stop = await _stopsService.GetByIdAsync(stopTime.StopId);
+                if (stop == null) continue;
+
                 stopTimesWithStops.Add(new StopTimeWithStopDto
                 {
                     StopTime = stopTime,
@@ -83,8 +94,8 @@ public class MetroController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Erro ao buscar viagem com paradas: {tripId}");
-            return StatusCode(500, new { message = "Erro ao processar requisição", error = ex.Message });
+            _logger.LogError(ex, $"Error searching for trip with stops:{tripId}");
+            return StatusCode(500, new { message = "Error processing request", error = ex.Message });
         }
     }
 
@@ -93,31 +104,32 @@ public class MetroController : ControllerBase
     {
         try
         {
-            var stop = await _stopsService.GetByIdAsync(stopId);
+            Stop? stop = await _stopsService.GetByIdAsync(stopId);
+
             if (stop == null)
-                return NotFound(new { message = $"Parada com ID {stopId} não encontrada" });
+                return NotFound(new { message = $"Stop with ID {stopId} not found" });
 
-            // Se não for fornecido um horário de referência, usa o horário atual
-            var reference = referenceTime ?? DateTime.Now;
+            DateTime reference = referenceTime ?? DateTime.Now;
 
-            // Converte o horário para um formato comparável com os horários do GTFS (HH:mm:ss)
-            var referenceTimeString = reference.ToString("HH:mm:ss");
+            string referenceTimeString = reference.ToString("HH:mm:ss");
 
-            // Obtém todas as paradas para o stopId
-            var stopTimes = await _stopTimesService.GetByStopIdAsync(stopId);
+            List<StopTime>? stopTimes = await _stopTimesService.GetByStopIdAsync(stopId);
 
-            // Filtra as próximas partidas e ordena por horário
+            if (stopTimes == null)
+                return NotFound(new { message = $"No stop time with {stopId} found" });
+
             var upcomingDepartures = stopTimes
                 .Where(st => string.Compare(st.DepartureTime, referenceTimeString) > 0)
                 .OrderBy(st => st.DepartureTime)
-                .Take(10) // Limite de 10 resultados
+                .Take(10)
                 .ToList();
 
-            var result = new List<StopTimeWithStopDto>();
+            List<StopTimeWithStopDto> result = new();
+
             foreach (var departure in upcomingDepartures)
             {
-                var trip = await _tripsService.GetByIdAsync(departure.TripId);
-                var route = trip != null ? await _routesService.GetByIdAsync(trip.RouteId) : null;
+                Trip? trip = await _tripsService.GetByIdAsync(departure.TripId);
+                Models.Route? route = trip != null ? await _routesService.GetByIdAsync(trip.RouteId) : null;
 
                 result.Add(new StopTimeWithStopDto
                 {
@@ -130,8 +142,8 @@ public class MetroController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Erro ao buscar próximas partidas para parada: {stopId}");
-            return StatusCode(500, new { message = "Erro ao processar requisição", error = ex.Message });
+            _logger.LogError(ex, $"Error searching for next departures for stop: {stopId}");
+            return StatusCode(500, new { message = "Error processing request", error = ex.Message });
         }
     }
 }

@@ -24,6 +24,11 @@ public class CalendarDatesController : ControllerBase
     [HttpGet("calendar-dates/service/{serviceId}")]
     public async Task<ActionResult<List<CalendarDate>>> GetByServiceId(string serviceId)
     {
-        return await _calendarDatesService.GetByServiceIdAsync(serviceId);
+        List<CalendarDate>? calendarDates =  await _calendarDatesService.GetByServiceIdAsync(serviceId);
+
+        if (calendarDates == null)
+            return NotFound();
+
+        return calendarDates;
     }
 }

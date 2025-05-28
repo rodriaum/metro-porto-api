@@ -24,7 +24,8 @@ public class CalendarController : ControllerBase
     [HttpGet("calendars/{id}")]
     public async Task<ActionResult<Calendar>> GetById(string id)
     {
-        var calendar = await _calendarService.GetByIdAsync(id);
+        Calendar? calendar = await _calendarService.GetByIdAsync(id);
+
         if (calendar == null)
             return NotFound();
 

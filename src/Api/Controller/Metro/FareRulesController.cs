@@ -24,6 +24,11 @@ public class FareRulesController : ControllerBase
     [HttpGet("fare-rules/fare/{fareId}")]
     public async Task<ActionResult<List<FareRule>>> GetByFareId(string fareId)
     {
-        return await _fareRulesService.GetByFareIdAsync(fareId);
+        List<FareRule>? fareRule = await _fareRulesService.GetByFareIdAsync(fareId);
+
+        if (fareRule == null)
+            return NotFound();
+
+        return fareRule;
     }
 }

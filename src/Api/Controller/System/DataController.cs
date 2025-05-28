@@ -24,14 +24,16 @@ public class DataController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Iniciando carregamento manual de dados");
+            _logger.LogInformation("Starting manual data loading...");
+
             await _gtfsDataService.LoadDataFromFilesAsync();
-            return Ok(new { message = "Dados carregados com sucesso" });
+
+            return Ok(new { message = "Data loaded successfully!" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao recarregar dados");
-            return StatusCode(500, new { message = "Erro ao carregar dados", error = ex.Message });
+            _logger.LogError(ex, "Error reloading data!");
+            return StatusCode(500, new { message = "Error loading data.", error = ex.Message });
         }
     }
 }

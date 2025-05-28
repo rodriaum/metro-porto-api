@@ -16,19 +16,19 @@ public class StopTimesController : ControllerBase
     }
 
     [HttpGet("stop-times")]
-    public async Task<ActionResult<List<StopTime>>> GetAll()
+    public async Task<ActionResult<List<StopTime>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 100)
     {
-        return await _stopTimesService.GetAllAsync();
+        return await _stopTimesService.GetAllAsync(page, pageSize);
     }
 
     [HttpGet("stop-times/trip/{tripId}")]
-    public async Task<ActionResult<List<StopTime>>> GetByTripId(string tripId)
+    public async Task<ActionResult<List<StopTime>?>> GetByTripId(string tripId)
     {
         return await _stopTimesService.GetByTripIdAsync(tripId);
     }
 
     [HttpGet("stop-times/stop/{stopId}")]
-    public async Task<ActionResult<List<StopTime>>> GetByStopId(string stopId, [FromQuery] int page = 1, [FromQuery] int pageSize = 100)
+    public async Task<ActionResult<List<StopTime>?>> GetByStopId(string stopId, [FromQuery] int page = 1, [FromQuery] int pageSize = 100)
     {
         return await _stopTimesService.GetByStopIdAsync(stopId, page, pageSize);
     }

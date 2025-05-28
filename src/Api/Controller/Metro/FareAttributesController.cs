@@ -24,7 +24,8 @@ public class FareAttributesController : ControllerBase
     [HttpGet("fare-attributes/{id}")]
     public async Task<ActionResult<FareAttribute>> GetById(string id)
     {
-        var fareAttribute = await _fareAttributesService.GetByIdAsync(id);
+        FareAttribute? fareAttribute = await _fareAttributesService.GetByIdAsync(id);
+
         if (fareAttribute == null)
             return NotFound();
 
