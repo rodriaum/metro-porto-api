@@ -14,19 +14,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0-nanoserver-1809 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["metro-porto-api.csproj", "."]
-RUN dotnet restore "./metro-porto-api.csproj"
+COPY ["MetroPortoAPI.csproj", "."]
+RUN dotnet restore "./MetroPortoAPI.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "./metro-porto-api.csproj" -c %BUILD_CONFIGURATION% -o /app/build
+RUN dotnet build "./MetroPortoAPI.csproj" -c %BUILD_CONFIGURATION% -o /app/build
 
 # Esta fase é usada para publicar o projeto de serviço a ser copiado para a fase final
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./metro-porto-api.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./MetroPortoAPI.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p:UseAppHost=false
 
 # Esta fase é usada na produção ou quando executada no VS no modo normal (padrão quando não está usando a configuração de Depuração)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "metro-porto-api.dll"]
+ENTRYPOINT ["dotnet", "MetroPortoAPI.dll"]

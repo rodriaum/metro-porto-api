@@ -1,4 +1,3 @@
-using MetroPorto.Api.Models;
 using MetroPortoAPI.Api.Interfaces;
 using MetroPortoAPI.Api.Models;
 using Microsoft.AspNetCore.Mvc;
