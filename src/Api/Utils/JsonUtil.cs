@@ -7,7 +7,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace MetroPorto.Api.Utils;
+namespace MetroPortoAPI.Api.Utils;
 
 public class JsonUtil
 {
@@ -32,7 +32,7 @@ public class JsonUtil
         }
         catch (JsonException)
         {
-            return default(T);
+            return default;
         }
     }
 }

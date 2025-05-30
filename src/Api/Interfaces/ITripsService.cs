@@ -1,7 +1,7 @@
-using MetroPorto.Api.Models;
+using MetroPortoAPI.Api.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace MetroPorto.Api.Interfaces;
+namespace MetroPortoAPI.Api.Interfaces;
 
 public interface ITripsService
 {

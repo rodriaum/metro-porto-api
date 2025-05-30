@@ -1,4 +1,4 @@
-namespace MetroPorto.Api.Models;
+namespace MetroPortoAPI.Api.Models;
 public class Route
 {
     public string Id { get; set; }

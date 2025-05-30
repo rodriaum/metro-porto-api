@@ -1,4 +1,4 @@
-namespace MetroPorto.Api;
+namespace MetroPortoAPI.Api;
 
 public class Program
 {

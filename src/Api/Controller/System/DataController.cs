@@ -1,9 +1,9 @@
-using MetroPorto.Api.Filter;
-using MetroPorto.Api.Interfaces.Gtfs;
 using MetroPorto.Api.Models;
+using MetroPortoAPI.Api.Filter;
+using MetroPortoAPI.Api.Interfaces.Gtfs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MetroPorto.Api.Controller.System;
+namespace MetroPortoAPI.Api.Controller.System;
 
 [ApiController]
 [Route("v1/porto/metro")]

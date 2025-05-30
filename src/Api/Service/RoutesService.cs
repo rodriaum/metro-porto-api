@@ -1,10 +1,10 @@
-using MetroPorto.Api.Interfaces;
-using MetroPorto.Api.Interfaces.Database;
-using MetroPorto.Api.Service.Database;
+using MetroPortoAPI.Api.Interfaces;
+using MetroPortoAPI.Api.Interfaces.Database;
+using MetroPortoAPI.Api.Service.Database;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace MetroPorto.Api.Service;
+namespace MetroPortoAPI.Api.Service;
 
 public class RoutesService : MongoService<Models.Route>, IRoutesService
 {

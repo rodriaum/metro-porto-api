@@ -1,6 +1,6 @@
 using MongoDB.Driver;
 
-namespace MetroPorto.Api.Service.Database;
+namespace MetroPortoAPI.Api.Service.Database;
 
 public abstract class MongoService<T>
 {

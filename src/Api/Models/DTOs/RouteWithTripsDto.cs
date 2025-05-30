@@ -1,4 +1,6 @@
-namespace MetroPorto.Api.Models;
+using MetroPortoAPI.Api.Models;
+
+namespace MetroPortoAPI.Api.Models.DTOs;
 
 public class RouteWithTripsDto
 {

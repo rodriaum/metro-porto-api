@@ -1,10 +1,10 @@
-using MetroPorto.Api.Interfaces;
-using MetroPorto.Api.Interfaces.Gtfs;
-using MetroPorto.Api.Models;
+using MetroPortoAPI.Api.Interfaces;
+using MetroPortoAPI.Api.Interfaces.Gtfs;
+using MetroPortoAPI.Api.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace MetroPorto.Api.Service.Gtfs;
+namespace MetroPortoAPI.Api.Service.Gtfs;
 
 public class GtfsDataService : IGtfsDataService
 {

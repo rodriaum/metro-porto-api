@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace MetroPorto.Api.Models;
+namespace MetroPortoAPI.Api.Models;
 
 public class Agency
 {

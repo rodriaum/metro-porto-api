@@ -1,4 +1,4 @@
-﻿namespace MetroPorto.Api.Interfaces.Database;
+﻿namespace MetroPortoAPI.Api.Interfaces.Database;
 
 public interface IRedisService
 {

@@ -1,9 +1,9 @@
-﻿using MetroPorto.Api.Models;
+﻿using MetroPortoAPI.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 
-namespace MetroPorto.Api.Filter;
+namespace MetroPortoAPI.Api.Filter;
 
 public class TokenAuthFilter : IAsyncActionFilter
 {

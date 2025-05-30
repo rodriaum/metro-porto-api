@@ -1,8 +1,8 @@
-﻿using MetroPorto.Api.Interfaces.Database;
-using MetroPorto.Api.Utils;
+﻿using MetroPortoAPI.Api.Interfaces.Database;
+using MetroPortoAPI.Api.Utils;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace MetroPorto.Api.Service.Database
+namespace MetroPortoAPI.Api.Service.Database
 {
     public class RedisService : IRedisService
     {

@@ -1,10 +1,10 @@
-using MetroPorto.Api.Interfaces;
-using MetroPorto.Api.Interfaces.Database;
-using MetroPorto.Api.Models;
-using MetroPorto.Api.Service.Database;
+using MetroPortoAPI.Api.Interfaces;
+using MetroPortoAPI.Api.Interfaces.Database;
+using MetroPortoAPI.Api.Models;
+using MetroPortoAPI.Api.Service.Database;
 using MongoDB.Driver;
 
-namespace MetroPorto.Api.Service;
+namespace MetroPortoAPI.Api.Service;
 
 public class ShapesService : MongoService<Shape>, IShapesService
 {
@@ -44,7 +44,7 @@ public class ShapesService : MongoService<Shape>, IShapesService
             ShapePtLon = double.Parse(fields[2], System.Globalization.CultureInfo.InvariantCulture),
             ShapePtSequence = int.Parse(fields[3]),
             ShapeDistTraveled = fields.Length > 4 && !string.IsNullOrEmpty(fields[4]) ?
-                double.Parse(fields[4], System.Globalization.CultureInfo.InvariantCulture) : (double?)null
+                double.Parse(fields[4], System.Globalization.CultureInfo.InvariantCulture) : null
         });
     }
 }

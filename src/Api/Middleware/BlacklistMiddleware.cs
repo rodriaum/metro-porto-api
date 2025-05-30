@@ -1,4 +1,4 @@
-﻿namespace MetroPorto.Api.Middleware;
+﻿namespace MetroPortoAPI.Api.Middleware;
 
 public class BlacklistMiddleware
 {

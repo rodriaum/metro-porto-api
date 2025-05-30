@@ -1,4 +1,4 @@
-namespace MetroPorto.Api.Interfaces;
+namespace MetroPortoAPI.Api.Interfaces;
 
 public interface IRoutesService
 {

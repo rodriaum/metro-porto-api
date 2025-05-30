@@ -1,6 +1,6 @@
-using MetroPorto.Api.Models;
+using MetroPortoAPI.Api.Models;
 
-namespace MetroPorto.Api.Interfaces;
+namespace MetroPortoAPI.Api.Interfaces;
 
 public interface ICalendarDatesService
 {

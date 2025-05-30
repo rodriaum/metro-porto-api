@@ -1,20 +1,19 @@
 using AspNetCoreRateLimit;
-using MetroPorto.Api.Filter;
-using MetroPorto.Api.Interfaces;
-using MetroPorto.Api.Interfaces.Database;
-using MetroPorto.Api.Interfaces.Gtfs;
-using MetroPorto.Api.Middleware;
-using MetroPorto.Api.Models;
-using MetroPorto.Api.Service;
-using MetroPorto.Api.Service.Database;
-using MetroPorto.Api.Service.Gtfs;
+using MetroPortoAPI.Api.Filter;
+using MetroPortoAPI.Api.Interfaces;
+using MetroPortoAPI.Api.Interfaces.Database;
+using MetroPortoAPI.Api.Interfaces.Gtfs;
+using MetroPortoAPI.Api.Middleware;
+using MetroPortoAPI.Api.Models;
 using MetroPortoAPI.Api.Service;
+using MetroPortoAPI.Api.Service.Database;
+using MetroPortoAPI.Api.Service.Gtfs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 
-namespace MetroPorto.Api;
+namespace MetroPortoAPI.Api;
 
 public class Startup
 {
@@ -101,7 +100,7 @@ public class Startup
             return new MongoClient(connection);
         });
 
-        services.AddSingleton<IMongoDatabase>(sp =>
+        services.AddSingleton(sp =>
             sp.GetRequiredService<IMongoClient>().GetDatabase("metro_porto"));
     }
 

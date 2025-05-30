@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
-namespace MetroPorto.Api.Middleware;
+namespace MetroPortoAPI.Api.Middleware;
 
 public class ProtectionMiddleware
 {
@@ -16,10 +16,10 @@ public class ProtectionMiddleware
         _logger = logger;
         _cache = cache;
 
-        int monitoringSeconds = configuration.GetValue<int>("Security:Protection:MonitoringPeriodSeconds", 10);
+        int monitoringSeconds = configuration.GetValue("Security:Protection:MonitoringPeriodSeconds", 10);
         _monitoringPeriod = TimeSpan.FromSeconds(monitoringSeconds);
 
-        _requestThreshold = configuration.GetValue<int>("Security:Protection:RequestThreshold", 50);
+        _requestThreshold = configuration.GetValue("Security:Protection:RequestThreshold", 50);
     }
 
     public async Task InvokeAsync(HttpContext context)

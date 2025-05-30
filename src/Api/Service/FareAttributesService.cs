@@ -1,7 +1,7 @@
-﻿using MetroPorto.Api.Interfaces;
-using MetroPorto.Api.Interfaces.Database;
-using MetroPorto.Api.Models;
-using MetroPorto.Api.Service.Database;
+﻿using MetroPortoAPI.Api.Interfaces;
+using MetroPortoAPI.Api.Interfaces.Database;
+using MetroPortoAPI.Api.Models;
+using MetroPortoAPI.Api.Service.Database;
 using MongoDB.Driver;
 
 namespace MetroPortoAPI.Api.Service;
