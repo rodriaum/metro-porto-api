@@ -8,6 +8,7 @@ using MetroPorto.Api.Models;
 using MetroPorto.Api.Service;
 using MetroPorto.Api.Service.Database;
 using MetroPorto.Api.Service.Gtfs;
+using MetroPortoAPI.Api.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.OpenApi.Models;

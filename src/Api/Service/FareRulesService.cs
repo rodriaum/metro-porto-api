@@ -14,6 +14,9 @@ public class FareRulesService : MongoService<FareRule>, IFareRulesService
         : base(database, logger, "fare_rules")
     {
         this._redis = redis;
+
+        IndexKeysDefinition<FareRule> indexKeysDefinition = Builders<FareRule>.IndexKeys.Ascending(r => r.FareId);
+        _collection.Indexes.CreateOne(new CreateIndexModel<FareRule>(indexKeysDefinition));
     }
 
     public async Task<List<FareRule>> GetAllAsync()
@@ -21,9 +24,12 @@ public class FareRulesService : MongoService<FareRule>, IFareRulesService
         return await _collection.Find(Builders<FareRule>.Filter.Empty).ToListAsync();
     }
 
-    public async Task<List<FareRule>> GetByFareIdAsync(string fareId)
+    public async Task<List<FareRule>?> GetByFareIdAsync(string fareId)
     {
-        return await _collection.Find(f => f.FareId == fareId).ToListAsync();
+        return await _redis.GetOrSetAsync(
+            $"fare-rules-{fareId}",
+            async () => await _collection.Find(f => f.FareId == fareId).ToListAsync()
+        );
     }
 
     public async Task ImportDataAsync(string directoryPath)
@@ -33,9 +39,9 @@ public class FareRulesService : MongoService<FareRule>, IFareRulesService
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
             FareId = fields[0],
-            RouteId = fields.Length > 1 ? fields[1] : null,
-            OriginId = fields.Length > 2 ? fields[2] : null,
-            DestinationId = fields.Length > 3 ? fields[3] : null
+            RouteId = fields.Length > 1 ? fields[1] : "",
+            OriginId = fields.Length > 2 ? fields[2] : "",
+            DestinationId = fields.Length > 3 ? fields[3] : ""
         });
     }
 }

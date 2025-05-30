@@ -58,6 +58,24 @@ public class TripsService : MongoService<Trip>, ITripsService
         );
     }
 
+    public async Task<List<Trip?>?> GetTripsBatchAsync(List<string> tripIds)
+    {
+        return await _redis.GetOrSetAsync(
+            $"trips-batch-{string.Join("-", tripIds.OrderBy(id => id))}",
+            async () =>
+            {
+                var filter = Builders<Trip>.Filter.In(t => t.TripId, tripIds);
+
+                var trips = await _collection.Find(filter).ToListAsync();
+
+                return tripIds
+                    .Select(id => trips.FirstOrDefault(t => t.TripId == id))
+                    .Where(t => t != null)
+                    .ToList();
+            }
+        );
+    }
+
     public async Task ImportDataAsync(string directoryPath)
     {
         string filePath = Path.Combine(directoryPath, "trips.txt");

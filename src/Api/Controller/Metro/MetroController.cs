@@ -100,7 +100,12 @@ public class MetroController : ControllerBase
     }
 
     [HttpGet("upcoming-departures/{stopId}")]
-    public async Task<ActionResult<List<StopTimeWithStopDto>>> GetUpcomingDepartures(string stopId, [FromQuery] DateTime? referenceTime = null)
+    public async Task<ActionResult<List<StopTimeWithStopDto>>> GetUpcomingDepartures(
+        string stopId,
+        [FromQuery] int take = 100,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 100,
+        [FromQuery] DateTime? referenceTime = null)
     {
         try
         {
@@ -113,7 +118,7 @@ public class MetroController : ControllerBase
 
             string referenceTimeString = reference.ToString("HH:mm:ss");
 
-            List<StopTime>? stopTimes = await _stopTimesService.GetByStopIdAsync(stopId);
+            List<StopTime>? stopTimes = await _stopTimesService.GetByStopIdAsync(stopId, page: page, pageSize: pageSize);
 
             if (stopTimes == null)
                 return NotFound(new { message = $"No stop time with {stopId} found" });
@@ -121,10 +126,12 @@ public class MetroController : ControllerBase
             var upcomingDepartures = stopTimes
                 .Where(st => string.Compare(st.DepartureTime, referenceTimeString) > 0)
                 .OrderBy(st => st.DepartureTime)
-                .Take(10)
+                .Take(take)
                 .ToList();
 
             List<StopTimeWithStopDto> result = new();
+
+            Dictionary<string, int> dic = new();
 
             foreach (var departure in upcomingDepartures)
             {

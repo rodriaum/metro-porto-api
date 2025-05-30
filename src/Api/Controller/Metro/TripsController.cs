@@ -42,4 +42,18 @@ public class TripsController : ControllerBase
 
         return trips;
     }
+
+    [HttpPost("trips/batch")]
+    public async Task<ActionResult<List<Trip>>> GetTripsBatch([FromBody] List<string> tripIds)
+    {
+        if (tripIds == null || !tripIds.Any())
+            return BadRequest("Trip ID list cannot be empty");
+
+        List<Trip> trips = await _tripsService.GetTripsBatchAsync(tripIds);
+
+        if (trips == null)
+            return NotFound();
+
+        return trips;
+    }
 }
