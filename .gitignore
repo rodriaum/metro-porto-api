@@ -5,8 +5,8 @@
 
 # App Ignore
 
-src/*.zip
-src/GtfsData
+Assets/GtfsData
+Assets/TempGtfs
 
 ### ASPNETCore ###
 ## Ignore Visual Studio temporary files, build results, and

@@ -1,12 +1,12 @@
 {
   "profiles": {
-    "MetroPortoAPI": {
+    "TransitGtfsApi": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:54633;http://localhost:54634"
+      "applicationUrl": "https://localhost:50856;http://localhost:50857"
     }
   }
 }
