@@ -1,11 +1,11 @@
-﻿using MetroPorto.Api.Models;
+﻿using MetroPortoAPI.Api.Models;
 using MetroPortoAPI.Api;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MetroPortoAPI.Api.Controller.System;
 
 [ApiController]
-[Route("v1/porto/metro")]
+[Route("api/v1/transit/gtfs")]
 public class InfoController : ControllerBase
 {
     [HttpGet("version")]
@@ -19,6 +19,7 @@ public class InfoController : ControllerBase
     {
         return Ok(new
         {
+			message = "ok",
             healthy = true,
             timestamp = DateTime.UtcNow
         });

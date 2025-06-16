@@ -2,6 +2,7 @@ using MetroPortoAPI.Api.Interfaces;
 using MetroPortoAPI.Api.Interfaces.Database;
 using MetroPortoAPI.Api.Models;
 using MetroPortoAPI.Api.Service.Database;
+using MetroPortoAPI.Api.Utils;
 using MongoDB.Driver;
 
 namespace MetroPortoAPI.Api.Service;
@@ -11,7 +12,7 @@ public class CalendarDatesService : MongoService<CalendarDate>, ICalendarDatesSe
     private readonly IRedisService _redis;
 
     public CalendarDatesService(IMongoDatabase database, ILogger<CalendarDatesService> logger, IRedisService redis)
-        : base(database, logger, "calendar_dates")
+        : base(database, logger, "gtfs_calendar_dates")
     {
         _redis = redis;
 
@@ -38,9 +39,9 @@ public class CalendarDatesService : MongoService<CalendarDate>, ICalendarDatesSe
         await ImportFromCsvAsync(filePath, fields => new CalendarDate
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            ServiceId = fields[0],
-            Date = fields[1],
-            ExceptionType = int.Parse(fields[2])
+            ServiceId = fields.GetValueOrDefault("service_id", "") ?? "",
+            Date = fields.GetValueOrDefault("date", "") ?? "",
+            ExceptionType = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("exception_type", null))
         });
     }
 }

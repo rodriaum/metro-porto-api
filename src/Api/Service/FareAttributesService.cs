@@ -2,7 +2,9 @@
 using MetroPortoAPI.Api.Interfaces.Database;
 using MetroPortoAPI.Api.Models;
 using MetroPortoAPI.Api.Service.Database;
+using MetroPortoAPI.Api.Utils;
 using MongoDB.Driver;
+using System.Globalization;
 
 namespace MetroPortoAPI.Api.Service;
 
@@ -11,7 +13,7 @@ public class FareAttributesService : MongoService<FareAttribute>, IFareAttribute
     private readonly IRedisService _redis;
 
     public FareAttributesService(IMongoDatabase database, ILogger<FareAttributesService> logger, IRedisService redis)
-        : base(database, logger, "fare_attributes")
+        : base(database, logger, "gtfs_fare_attributes")
     {
         _redis = redis;
 
@@ -38,12 +40,12 @@ public class FareAttributesService : MongoService<FareAttribute>, IFareAttribute
         await ImportFromCsvAsync(filePath, fields => new FareAttribute
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            FareId = fields[0],
-            Price = decimal.Parse(fields[1], System.Globalization.CultureInfo.InvariantCulture),
-            CurrencyType = fields[2],
-            PaymentMethod = int.Parse(fields[3]),
-            Transfers = int.Parse(fields[4]),
-            TransferDuration = fields.Length > 5 && !string.IsNullOrEmpty(fields[5]) ? int.Parse(fields[5]) : (int?)null
+            FareId = fields.GetValueOrDefault("fare_id", "") ?? "",
+            Price = NumberUtil.ParseDecimalSafe(fields.GetValueOrDefault("price", null), format: CultureInfo.InvariantCulture),
+            CurrencyType = fields.GetValueOrDefault("currency_type", "") ?? "",
+            PaymentMethod = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("payment_method", null)),
+            Transfers = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("transfers", null)),
+            TransferDuration = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("transfer_duration", null)),
         });
     }
 }

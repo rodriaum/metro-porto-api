@@ -2,7 +2,9 @@ using MetroPortoAPI.Api.Interfaces;
 using MetroPortoAPI.Api.Interfaces.Database;
 using MetroPortoAPI.Api.Models;
 using MetroPortoAPI.Api.Service.Database;
+using MetroPortoAPI.Api.Utils;
 using MongoDB.Driver;
+using System.Globalization;
 
 namespace MetroPortoAPI.Api.Service;
 
@@ -11,7 +13,7 @@ public class StopTimesService : MongoService<StopTime>, IStopTimesService
     private readonly IRedisService _redis;
 
     public StopTimesService(IMongoDatabase database, ILogger<StopTimesService> logger, IRedisService redis)
-        : base(database, logger, "stop_times")
+        : base(database, logger, "gtfs_stop_times")
     {
         _redis = redis;
 
@@ -61,16 +63,15 @@ public class StopTimesService : MongoService<StopTime>, IStopTimesService
         await ImportFromCsvAsync(filePath, fields => new StopTime
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            TripId = fields[0],
-            ArrivalTime = fields[1],
-            DepartureTime = fields[2],
-            StopId = fields[3],
-            StopSequence = int.Parse(fields[4]),
-            StopHeadsign = fields.Length > 5 ? fields[5] : "",
-            PickupType = fields.Length > 6 && !string.IsNullOrEmpty(fields[6]) ? int.Parse(fields[6]) : null,
-            DropOffType = fields.Length > 7 && !string.IsNullOrEmpty(fields[7]) ? int.Parse(fields[7]) : null,
-            ShapeDistTraveled = fields.Length > 8 && !string.IsNullOrEmpty(fields[8]) ?
-                double.Parse(fields[8], System.Globalization.CultureInfo.InvariantCulture) : null
+            TripId = fields.GetValueOrDefault("trip_id", "") ?? "",
+            ArrivalTime = fields.GetValueOrDefault("arrival_time", "") ?? "",
+            DepartureTime = fields.GetValueOrDefault("departure_time", "") ?? "",
+            StopId = fields.GetValueOrDefault("stop_id", "") ?? "",
+            StopSequence = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("stop_sequence", null)),
+            StopHeadsign = fields.GetValueOrDefault("stop_headsign", "") ?? "",
+            PickupType = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("pickup_type", null)),
+            DropOffType = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("drop_off_type", null)),
+            ShapeDistTraveled = NumberUtil.ParseDoubleSafe(fields.GetValueOrDefault("shape_dist_traveled", null), format: CultureInfo.InvariantCulture),
         });
     }
 }

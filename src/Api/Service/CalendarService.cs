@@ -2,6 +2,7 @@
 using MetroPortoAPI.Api.Interfaces.Database;
 using MetroPortoAPI.Api.Models;
 using MetroPortoAPI.Api.Service.Database;
+using MetroPortoAPI.Api.Utils;
 using MongoDB.Driver;
 
 namespace MetroPortoAPI.Api.Service;
@@ -11,7 +12,7 @@ public class CalendarService : MongoService<Calendar>, ICalendarService
     private readonly IRedisService _redis;
 
     public CalendarService(IMongoDatabase database, ILogger<CalendarService> logger, IRedisService redis)
-        : base(database, logger, "calendar")
+        : base(database, logger, "gtfs_calendar")
     {
         _redis = redis;
 
@@ -39,16 +40,16 @@ public class CalendarService : MongoService<Calendar>, ICalendarService
         await ImportFromCsvAsync(filePath, fields => new Calendar
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            ServiceId = fields[0],
-            Monday = int.Parse(fields[1]),
-            Tuesday = int.Parse(fields[2]),
-            Wednesday = int.Parse(fields[3]),
-            Thursday = int.Parse(fields[4]),
-            Friday = int.Parse(fields[5]),
-            Saturday = int.Parse(fields[6]),
-            Sunday = int.Parse(fields[7]),
-            StartDate = fields[8],
-            EndDate = fields[9]
+            ServiceId = fields.GetValueOrDefault("service_id", "") ?? "",
+            Monday = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("monday", null)),
+            Tuesday = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("tuesday", null)),
+            Wednesday = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("wednesday", null)),
+            Thursday = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("thursday", null)),
+            Friday = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("friday", null)),
+            Saturday = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("saturday", null)),
+            Sunday = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("sunday", null)),
+            StartDate = fields.GetValueOrDefault("start_date", "") ?? "",
+            EndDate = fields.GetValueOrDefault("end_date", "") ?? "",
         });
     }
 }

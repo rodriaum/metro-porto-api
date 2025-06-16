@@ -1,4 +1,4 @@
-using MetroPorto.Api.Models;
+using MetroPortoAPI.Api.Models;
 using MetroPortoAPI.Api.Filter;
 using MetroPortoAPI.Api.Interfaces.Gtfs;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace MetroPortoAPI.Api.Controller.System;
 
 [ApiController]
-[Route("v1/porto/metro")]
+[Route("api/v1/transit/gtfs")]
 [ServiceFilter(typeof(TokenAuthFilter))]
 public class DataController : ControllerBase
 {

@@ -11,7 +11,7 @@ public class AgencyService : MongoService<Agency>, IAgencyService
     private readonly IRedisService _redis;
 
     public AgencyService(IMongoDatabase database, ILogger<AgencyService> logger, IRedisService redis)
-        : base(database, logger, "agency")
+        : base(database, logger, "gtfs_agency")
     {
         _redis = redis;
 
@@ -38,11 +38,11 @@ public class AgencyService : MongoService<Agency>, IAgencyService
         await ImportFromCsvAsync(filePath, fields => new Agency
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            AgencyId = fields[0],
-            AgencyName = fields[1],
-            AgencyUrl = fields[2],
-            AgencyTimezone = fields[3],
-            AgencyLang = fields.Length > 4 ? fields[4] : ""
+            AgencyId = fields.GetValueOrDefault("agency_id", "") ?? "",
+            AgencyName = fields.GetValueOrDefault("agency_name", "") ?? "",
+            AgencyUrl = fields.GetValueOrDefault("agency_url", "") ?? "",
+            AgencyTimezone = fields.GetValueOrDefault("agency_timezone", "") ?? "",
+            AgencyLang = fields.GetValueOrDefault("agency_lang", "") ?? ""
         });
     }
 }

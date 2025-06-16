@@ -30,6 +30,6 @@ public class Program
                 logging.AddDebug();
 
                 logging.AddFilter("Microsoft.AspNetCore.HttpOverrides", LogLevel.Warning);
-                logging.AddFilter("MetroPorto.Api.Middleware", LogLevel.Warning);
+                logging.AddFilter("MetroPortoAPI.Api.Middleware", LogLevel.Warning);
             });
 }

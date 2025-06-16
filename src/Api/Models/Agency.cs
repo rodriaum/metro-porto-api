@@ -10,4 +10,7 @@ public class Agency
     public string AgencyUrl { get; set; }
     public string AgencyTimezone { get; set; }
     public string AgencyLang { get; set; }
+    public string? AgencyPhone { get; set; }
+    public string? AgencyFareUrl { get; set; }
+    public string? AgencyEmail { get; set; }
 }

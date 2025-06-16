@@ -13,7 +13,7 @@ public abstract class MongoService<T>
         _logger = logger;
     }
 
-    protected async Task ImportFromCsvAsync(string filePath, Func<string[], T> parseFunction)
+    protected async Task ImportFromCsvAsync(string filePath, Func<Dictionary<string, string?>, T> parseFunction)
     {
         if (!File.Exists(filePath))
         {
@@ -25,9 +25,6 @@ public abstract class MongoService<T>
         {
             _logger.LogInformation($"Importing data from {filePath}");
 
-            // Delete all existing documents
-            await _collection.DeleteManyAsync(Builders<T>.Filter.Empty);
-
             var entities = new List<T>();
             string[] lines = await File.ReadAllLinesAsync(filePath);
 
@@ -37,14 +34,25 @@ public abstract class MongoService<T>
                 return;
             }
 
-            // Skip header line
+            string[] headers = lines[0].Split(',');
+
             for (int i = 1; i < lines.Length; i++)
             {
                 string line = lines[i];
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
-                string[] fields = line.Split(',');
-                T entity = parseFunction(fields);
+                string[] values = line.Split(',');
+                var rowData = new Dictionary<string, string?>();
+
+                for (int j = 0; j < headers.Length; j++)
+                {
+                    if (j < values.Length)
+                    {
+                        rowData[headers[j]] = string.IsNullOrWhiteSpace(values[j]) ? null : values[j];
+                    }
+                }
+
+                T entity = parseFunction(rowData);
                 entities.Add(entity);
             }
 
@@ -56,7 +64,7 @@ public abstract class MongoService<T>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error importing data from {filePath}");
+            _logger.LogError(ex, $"\nError importing data from {filePath}");
             throw;
         }
     }

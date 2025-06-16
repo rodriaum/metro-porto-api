@@ -2,7 +2,9 @@ using MetroPortoAPI.Api.Interfaces;
 using MetroPortoAPI.Api.Interfaces.Database;
 using MetroPortoAPI.Api.Models;
 using MetroPortoAPI.Api.Service.Database;
+using MetroPortoAPI.Api.Utils;
 using MongoDB.Driver;
+using System.Globalization;
 
 namespace MetroPortoAPI.Api.Service;
 
@@ -11,7 +13,7 @@ public class ShapesService : MongoService<Shape>, IShapesService
     private readonly IRedisService _redis;
 
     public ShapesService(IMongoDatabase database, ILogger<ShapesService> logger, IRedisService redis)
-        : base(database, logger, "shapes")
+        : base(database, logger, "gtfs_shapes")
     {
         _redis = redis;
 
@@ -39,12 +41,11 @@ public class ShapesService : MongoService<Shape>, IShapesService
         await ImportFromCsvAsync(filePath, fields => new Shape
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            ShapeId = fields[0],
-            ShapePtLat = double.Parse(fields[1], System.Globalization.CultureInfo.InvariantCulture),
-            ShapePtLon = double.Parse(fields[2], System.Globalization.CultureInfo.InvariantCulture),
-            ShapePtSequence = int.Parse(fields[3]),
-            ShapeDistTraveled = fields.Length > 4 && !string.IsNullOrEmpty(fields[4]) ?
-                double.Parse(fields[4], System.Globalization.CultureInfo.InvariantCulture) : null
+            ShapeId = fields.GetValueOrDefault("shape_id", "") ?? "",
+            ShapePtLat = NumberUtil.ParseDoubleSafe(fields.GetValueOrDefault("shape_pt_lat", null), format: CultureInfo.InvariantCulture),
+            ShapePtLon = NumberUtil.ParseDoubleSafe(fields.GetValueOrDefault("shape_pt_lon", null), format: CultureInfo.InvariantCulture),
+            ShapePtSequence = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("shape_pt_sequence", null)),
+            ShapeDistTraveled = NumberUtil.ParseDoubleSafe(fields.GetValueOrDefault("shape_dist_traveled", null), format: CultureInfo.InvariantCulture),
         });
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace MetroPortoAPI.Api.Controller.Metro;
 
 [ApiController]
-[Route("v1/porto/metro")]
+[Route("api/v1/transit/gtfs")]
 public class RoutesController : ControllerBase
 {
     private readonly IRoutesService _routesService;

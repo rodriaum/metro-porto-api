@@ -1,6 +1,7 @@
 using MetroPortoAPI.Api.Interfaces;
 using MetroPortoAPI.Api.Interfaces.Database;
 using MetroPortoAPI.Api.Service.Database;
+using MetroPortoAPI.Api.Utils;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -11,7 +12,7 @@ public class RoutesService : MongoService<Models.Route>, IRoutesService
     private readonly IRedisService _redis;
 
     public RoutesService(IMongoDatabase database, ILogger<RoutesService> logger, IRedisService redis)
-        : base(database, logger, "routes")
+        : base(database, logger, "gtfs_routes")
     {
         _redis = redis;
 
@@ -39,15 +40,15 @@ public class RoutesService : MongoService<Models.Route>, IRoutesService
         await ImportFromCsvAsync(filePath, fields => new Models.Route
         {
             Id = ObjectId.GenerateNewId().ToString(),
-            RouteId = fields[0],
-            AgencyId = fields.Length > 1 ? fields[1] : "",
-            RouteShortName = fields.Length > 2 ? fields[2] : "",
-            RouteLongName = fields.Length > 3 ? fields[3] : "",
-            RouteDesc = fields.Length > 4 ? fields[4] : "",
-            RouteType = int.Parse(fields[5]),
-            RouteUrl = fields.Length > 6 ? fields[6] : "",
-            RouteColor = fields.Length > 7 ? fields[7] : "",
-            RouteTextColor = fields.Length > 8 ? fields[8] : ""
+            RouteId = fields.GetValueOrDefault("route_id", "") ?? "",
+            AgencyId = fields.GetValueOrDefault("agency_id", "") ?? "",
+            RouteShortName = fields.GetValueOrDefault("route_short_name", "") ?? "",
+            RouteLongName = fields.GetValueOrDefault("route_long_name", "") ?? "",
+            RouteDesc = fields.GetValueOrDefault("route_desc", "") ?? "",
+            RouteType = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("route_type", null)),
+            RouteUrl = fields.GetValueOrDefault("route_url", "") ?? "",
+            RouteColor = fields.GetValueOrDefault("route_color", "") ?? "",
+            RouteTextColor = fields.GetValueOrDefault("route_text_color", "") ?? "",
         });
     }
 }

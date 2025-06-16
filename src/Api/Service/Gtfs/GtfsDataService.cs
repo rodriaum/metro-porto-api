@@ -1,7 +1,6 @@
 using MetroPortoAPI.Api.Interfaces;
 using MetroPortoAPI.Api.Interfaces.Gtfs;
 using MetroPortoAPI.Api.Models;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace MetroPortoAPI.Api.Service.Gtfs;
@@ -59,9 +58,8 @@ public class GtfsDataService : IGtfsDataService
     {
         try
         {
-            // Check if any data exists in MongoDB
-            var agencyCollection = _database.GetCollection<Agency>("agency");
-            var dataExists = await agencyCollection.CountDocumentsAsync(FilterDefinition<Agency>.Empty) > 0;
+            IMongoCollection<Agency> agencyCollection = _database.GetCollection<Agency>("agency");
+            bool dataExists = await agencyCollection.CountDocumentsAsync(FilterDefinition<Agency>.Empty) > 0;
 
             if (!dataExists)
             {
@@ -84,12 +82,27 @@ public class GtfsDataService : IGtfsDataService
     {
         try
         {
-            string gtfsDirectoryPath = await _gtfsFileService.EnsureGtfsFilesExistAsync();
+            List<string> gtfsDirectories = await _gtfsFileService.EnsureGtfsFilesExistAsync();
 
-            _logger.LogInformation("Starting data import from GTFS files");
+            if (gtfsDirectories.Count == 0)
+            {
+                _logger.LogWarning("No GTFS directory found for import.");
+                return;
+            }
 
-            // Import data in parallel
-            var tasks = new List<Task>
+            _logger.LogInformation($"Starting import of data from {gtfsDirectories.Count} GTFS sources");
+
+            foreach (string collectionName in Constant.GtfsCollections)
+            {
+                _logger.LogInformation($"Clearing collection {collectionName}");
+                await _database.DropCollectionAsync(collectionName);
+            }
+
+            foreach (string gtfsDirectoryPath in gtfsDirectories)
+            {
+                _logger.LogInformation($"Importing GTFS data from {gtfsDirectoryPath}");
+
+                List<Task> tasks = new List<Task>
                 {
                     _agencyService.ImportDataAsync(gtfsDirectoryPath),
                     _calendarService.ImportDataAsync(gtfsDirectoryPath),
@@ -104,8 +117,11 @@ public class GtfsDataService : IGtfsDataService
                     _tripsService.ImportDataAsync(gtfsDirectoryPath)
                 };
 
-            await Task.WhenAll(tasks);
-            _logger.LogInformation("Data import completed successfully");
+                await Task.WhenAll(tasks);
+                _logger.LogInformation($"Data import from {gtfsDirectoryPath} completed successfully");
+            }
+
+            _logger.LogInformation("Import of all GTFS data completed successfully");
         }
         catch (Exception ex)
         {

@@ -11,7 +11,7 @@ public class FareRulesService : MongoService<FareRule>, IFareRulesService
     private readonly IRedisService _redis;
 
     public FareRulesService(IMongoDatabase database, ILogger<FareRulesService> logger, IRedisService redis)
-        : base(database, logger, "fare_rules")
+        : base(database, logger, "gtfs_fare_rules")
     {
         this._redis = redis;
 
@@ -38,10 +38,10 @@ public class FareRulesService : MongoService<FareRule>, IFareRulesService
         await ImportFromCsvAsync(filePath, fields => new FareRule
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            FareId = fields[0],
-            RouteId = fields.Length > 1 ? fields[1] : "",
-            OriginId = fields.Length > 2 ? fields[2] : "",
-            DestinationId = fields.Length > 3 ? fields[3] : ""
+            FareId = fields.GetValueOrDefault("fare_id", "") ?? "",
+            RouteId = fields.GetValueOrDefault("route_id", "") ?? "",
+            OriginId = fields.GetValueOrDefault("origin_id", "") ?? "",
+            DestinationId = fields.GetValueOrDefault("destination_id", "") ?? ""
         });
     }
 }

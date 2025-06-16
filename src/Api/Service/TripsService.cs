@@ -2,6 +2,7 @@ using MetroPortoAPI.Api.Interfaces;
 using MetroPortoAPI.Api.Interfaces.Database;
 using MetroPortoAPI.Api.Models;
 using MetroPortoAPI.Api.Service.Database;
+using MetroPortoAPI.Api.Utils;
 using MongoDB.Driver;
 
 namespace MetroPortoAPI.Api.Service;
@@ -11,7 +12,7 @@ public class TripsService : MongoService<Trip>, ITripsService
     private readonly IRedisService _redis;
 
     public TripsService(IMongoDatabase database, ILogger<TripsService> logger, IRedisService redis)
-        : base(database, logger, "trips")
+        : base(database, logger, "gtfs_trips")
     {
         _redis = redis;
 
@@ -83,13 +84,14 @@ public class TripsService : MongoService<Trip>, ITripsService
         await ImportFromCsvAsync(filePath, fields => new Trip
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            RouteId = fields[0],
-            ServiceId = fields[1],
-            TripId = fields[2],
-            TripHeadsign = fields.Length > 3 ? fields[3] : "",
-            DirectionId = fields.Length > 4 && !string.IsNullOrEmpty(fields[4]) ? int.Parse(fields[4]) : null,
-            BlockId = fields.Length > 5 ? fields[5] : "",
-            ShapeId = fields.Length > 6 ? fields[6] : ""
+            RouteId = fields.GetValueOrDefault("route_id", "") ?? "",
+            ServiceId = fields.GetValueOrDefault("service_id", "") ?? "",
+            TripId = fields.GetValueOrDefault("trip_id", "") ?? "",
+            TripHeadsign = fields.GetValueOrDefault("trip_headsign", "") ?? "",
+            WheelchairAccessible = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("wheelchair_accessible", null)),
+            DirectionId = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("direction_id", null)),
+            BlockId = fields.GetValueOrDefault("block_id", "") ?? "",
+            ShapeId = fields.GetValueOrDefault("shape_id", "") ?? ""
         });
     }
 }

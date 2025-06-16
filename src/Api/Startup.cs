@@ -1,4 +1,5 @@
 using AspNetCoreRateLimit;
+using DotNetEnv;
 using MetroPortoAPI.Api.Filter;
 using MetroPortoAPI.Api.Interfaces;
 using MetroPortoAPI.Api.Interfaces.Database;
@@ -19,10 +20,68 @@ public class Startup
 {
     public Startup(IConfiguration configuration)
     {
+        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        string envPath = Path.Combine(baseDirectory, ".env");
+
+        Console.WriteLine($"Trying to load .env file from path: {envPath}");
+
+        if (File.Exists(envPath))
+        {
+            Console.WriteLine(".env file found!");
+            Env.Load(envPath);
+            Console.WriteLine(".env file loaded successfully!");
+        }
+        else
+        {
+            Console.WriteLine(".env file not found in bin directory!");
+
+            string rootPath = Path.Combine(baseDirectory, "..", "..", "..", "..", ".env");
+            Console.WriteLine($"Trying to load from root directory: {rootPath}");
+
+            if (File.Exists(rootPath))
+            {
+                Console.WriteLine(".env file found in root directory!");
+                Env.Load(rootPath);
+                Console.WriteLine(".env file loaded successfully!");
+            }
+            else
+            {
+                Console.WriteLine("ERROR: .env file not found in any location!");
+                Console.WriteLine("Please create a .env file in the project root");
+                Environment.Exit(1);
+            }
+        }
+
         Configuration = configuration;
     }
 
     public IConfiguration Configuration { get; }
+
+    private void ValidateEnvironmentVariables(ILogger<Startup> logger)
+    {
+        List<string> missingVars = new List<string>();
+
+        foreach (var envVar in Constant.RequiredEnvVars)
+        {
+            string? value = Environment.GetEnvironmentVariable(envVar);
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                missingVars.Add(envVar);
+                logger.LogError($"Required environment variable not found: {envVar}");
+            }
+            else
+            {
+                logger.LogInformation($"Loaded environment variable: {envVar}");
+            }
+        }
+
+        if (missingVars.Any())
+        {
+            logger.LogError("Application terminated due to missing environment variables.");
+            Environment.Exit(0);
+        }
+    }
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -67,7 +126,7 @@ public class Startup
         // Swagger
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Metro do Porto API", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = $"{Constant.Name} API", Version = Constant.Version });
         });
 
         services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -82,16 +141,12 @@ public class Startup
         // MongoDB
         services.AddSingleton<IMongoClient>(sp =>
         {
-            string? connection = Configuration.GetConnectionString("MongoDB");
+            string? connection = Environment.GetEnvironmentVariable("MONGODB_CONNECTION");
+            ILogger<Startup> logger = sp.GetRequiredService<ILogger<Startup>>();
 
-            if (string.IsNullOrWhiteSpace(connection))
-            {
-                // dev test
-                connection = "mongodb://localhost:27017";
-                Console.WriteLine("MongoDB connection string not found in configuration.");
-            }
+            logger.LogInformation("Setting up MongoDB connection...");
 
-            MongoClientSettings settings = MongoClientSettings.FromConnectionString(connection);
+            MongoClientSettings settings = MongoClientSettings.FromConnectionString(connection!);
 
             settings.MaxConnectionPoolSize = 1000;
             settings.MinConnectionPoolSize = 10;
@@ -101,7 +156,14 @@ public class Startup
         });
 
         services.AddSingleton(sp =>
-            sp.GetRequiredService<IMongoClient>().GetDatabase("metro_porto"));
+        {
+            string? dbName = Environment.GetEnvironmentVariable("MONGODB_DATABASE_NAME")?.ToLower();
+            ILogger<Startup> logger = sp.GetRequiredService<ILogger<Startup>>();
+
+            logger.LogInformation($"Using MongoDB database: {dbName}");
+
+            return sp.GetRequiredService<IMongoClient>().GetDatabase(dbName!);
+        });
     }
 
     private void ConfigureCacheServices(IServiceCollection services)
@@ -109,17 +171,16 @@ public class Startup
         // Redis
         services.AddStackExchangeRedisCache(options =>
         {
-            string? connection = Configuration.GetConnectionString("Redis");
+            string? connection = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
+            string? instanceName = Environment.GetEnvironmentVariable("REDIS_INSTANCE_NAME")?.ToLower();
 
-            if (string.IsNullOrWhiteSpace(connection))
-            {
-                // dev test
-                connection = "localhost:6379,abortConnect=false";
-                Console.WriteLine("Redis connection string not found in configuration.");
-            }
+            ILogger<Startup> logger = services.BuildServiceProvider().GetRequiredService<ILogger<Startup>>();
+
+            logger.LogInformation("Configuring Redis connection...");
+            logger.LogInformation($"Redis Instance Name: {instanceName}");
 
             options.Configuration = connection;
-            options.InstanceName = $"{Constant.Name.Replace(" ", "-").ToLower()}:";
+            options.InstanceName = $"{instanceName}:";
         });
 
         services.AddSingleton<IRedisService, RedisService>();
@@ -147,11 +208,11 @@ public class Startup
     {
         app.Use(async (context, next) =>
         {
-            context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-            context.Response.Headers.Add("X-Frame-Options", "DENY");
-            context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
-            context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
-            context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'");
+            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+            context.Response.Headers.Append("X-Frame-Options", "DENY");
+            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+            context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+            context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'");
 
             context.Response.Headers.Remove("Server");
             context.Response.Headers.Remove("X-Powered-By");
@@ -162,6 +223,8 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<Startup> logger)
     {
+        ValidateEnvironmentVariables(logger);
+
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -175,7 +238,7 @@ public class Startup
         ConfigureSecurityHeaders(app);
 
         app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Metro do Porto API v1"));
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{Constant.Name} API {Constant.Version}"));
 
         app.UseMiddleware<BlacklistMiddleware>();
         app.UseMiddleware<ProtectionMiddleware>();
@@ -197,9 +260,8 @@ public class Startup
 
     private void InitializeDatabase(IServiceProvider serviceProvider, ILogger<Startup> logger)
     {
-        var gtfsDataService = serviceProvider.GetRequiredService<IGtfsDataService>();
+        IGtfsDataService gtfsDataService = serviceProvider.GetRequiredService<IGtfsDataService>();
 
-        // Bomb code :)
         try
         {
             gtfsDataService.InitializeAsync().Wait();
