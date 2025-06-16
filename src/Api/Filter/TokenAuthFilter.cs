@@ -7,11 +7,12 @@ namespace MetroPortoAPI.Api.Filter;
 
 public class TokenAuthFilter : IAsyncActionFilter
 {
-    private readonly AppSettings _appSettings;
+    private readonly string _apiToken;
 
-    public TokenAuthFilter(IOptions<AppSettings> appSettings)
+    public TokenAuthFilter()
     {
-        _appSettings = appSettings.Value;
+        string? apiToken = Environment.GetEnvironmentVariable("API_TOKEN");
+        _apiToken = apiToken!;
     }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -30,7 +31,7 @@ public class TokenAuthFilter : IAsyncActionFilter
         }
 
         string token = headerValue.Substring("Bearer ".Length).Trim();
-        if (string.IsNullOrEmpty(token) || token != _appSettings.ApiToken)
+        if (string.IsNullOrEmpty(token) || token != _apiToken)
         {
             context.Result = new UnauthorizedObjectResult(new { message = "Invalid token" });
             return;

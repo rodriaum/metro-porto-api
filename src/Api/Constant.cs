@@ -37,6 +37,7 @@ public class Constant
         "MONGODB_CONNECTION",
         "REDIS_CONNECTION",
         "MONGODB_DATABASE_NAME",
-        "REDIS_INSTANCE_NAME"
+        "REDIS_INSTANCE_NAME",
+        "API_TOKEN"
     };
 }

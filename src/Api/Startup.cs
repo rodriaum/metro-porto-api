@@ -129,8 +129,6 @@ public class Startup
             c.SwaggerDoc("v1", new OpenApiInfo { Title = $"{Constant.Name} API", Version = Constant.Version });
         });
 
-        services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-
         services.AddScoped<TokenAuthFilter>();
 
         services.AddHttpClient();
