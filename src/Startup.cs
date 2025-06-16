@@ -8,7 +8,6 @@ using TransitGtfsApi.Filter;
 using TransitGtfsApi.Interfaces;
 using TransitGtfsApi.Interfaces.Database;
 using TransitGtfsApi.Interfaces.Gtfs;
-using TransitGtfsApi.Middleware;
 using TransitGtfsApi.Service;
 using TransitGtfsApi.Service.Database;
 using TransitGtfsApi.Service.Gtfs;
@@ -237,8 +236,6 @@ public class Startup
         app.UseSwagger();
         app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{Constant.Name} API {Constant.Version}"));
 
-        app.UseMiddleware<BlacklistMiddleware>();
-        app.UseMiddleware<ProtectionMiddleware>();
         app.UseIpRateLimiting();
 
         app.UseHttpsRedirection();
