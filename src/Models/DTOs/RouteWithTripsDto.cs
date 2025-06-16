@@ -1,6 +1,6 @@
-using TransitGtfs.Api.Models;
+using TransitGtfsApi.Models;
 
-namespace TransitGtfs.Api.Models.DTOs;
+namespace TransitGtfsApi.Models.DTOs;
 
 public class RouteWithTripsDto
 {

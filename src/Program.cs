@@ -1,4 +1,4 @@
-namespace TransitGtfs.Api;
+namespace TransitGtfsApi;
 
 public class Program
 {
@@ -30,6 +30,6 @@ public class Program
                 logging.AddDebug();
 
                 logging.AddFilter("Microsoft.AspNetCore.HttpOverrides", LogLevel.Warning);
-                logging.AddFilter("TransitGtfs.Api.Middleware", LogLevel.Warning);
+                logging.AddFilter("TransitGtfsApi.Middleware", LogLevel.Warning);
             });
 }

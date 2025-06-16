@@ -1,9 +1,9 @@
-using TransitGtfs.Api.Interfaces;
-using TransitGtfs.Api.Interfaces.Gtfs;
-using TransitGtfs.Api.Models;
+using TransitGtfsApi.Interfaces;
+using TransitGtfsApi.Interfaces.Gtfs;
+using TransitGtfsApi.Models;
 using MongoDB.Driver;
 
-namespace TransitGtfs.Api.Service.Gtfs;
+namespace TransitGtfsApi.Service.Gtfs;
 
 public class GtfsDataService : IGtfsDataService
 {

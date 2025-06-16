@@ -1,4 +1,4 @@
-﻿namespace TransitGtfs.Api.Middleware;
+﻿namespace TransitGtfsApi.Middleware;
 
 public class BlacklistMiddleware
 {

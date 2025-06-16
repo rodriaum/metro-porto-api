@@ -1,6 +1,6 @@
 using MongoDB.Driver;
 
-namespace TransitGtfs.Api.Service.Database;
+namespace TransitGtfsApi.Service.Database;
 
 public abstract class MongoService<T>
 {

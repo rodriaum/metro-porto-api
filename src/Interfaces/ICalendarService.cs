@@ -1,6 +1,6 @@
-using TransitGtfs.Api.Models;
+using TransitGtfsApi.Models;
 
-namespace TransitGtfs.Api.Interfaces;
+namespace TransitGtfsApi.Interfaces;
 
 public interface ICalendarService
 {

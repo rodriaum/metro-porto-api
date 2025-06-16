@@ -1,4 +1,4 @@
-namespace TransitGtfs.Api.Models.DTOs;
+namespace TransitGtfsApi.Models.DTOs;
 
 public class StopTimeWithStopDto
 {

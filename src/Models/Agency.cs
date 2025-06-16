@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace TransitGtfs.Api.Models;
+namespace TransitGtfsApi.Models;
 
 public class Agency
 {

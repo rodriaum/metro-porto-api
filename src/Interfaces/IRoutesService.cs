@@ -1,4 +1,4 @@
-namespace TransitGtfs.Api.Interfaces;
+namespace TransitGtfsApi.Interfaces;
 
 public interface IRoutesService
 {

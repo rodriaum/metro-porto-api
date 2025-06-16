@@ -1,9 +1,9 @@
-﻿using TransitGtfs.Api.Models;
+﻿using TransitGtfsApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 
-namespace TransitGtfs.Api.Filter;
+namespace TransitGtfsApi.Filter;
 
 public class TokenAuthFilter : IAsyncActionFilter
 {

@@ -1,11 +1,11 @@
-using TransitGtfs.Api.Interfaces;
-using TransitGtfs.Api.Interfaces.Database;
-using TransitGtfs.Api.Service.Database;
-using TransitGtfs.Api.Utils;
+using TransitGtfsApi.Interfaces;
+using TransitGtfsApi.Interfaces.Database;
+using TransitGtfsApi.Service.Database;
+using TransitGtfsApi.Utils;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace TransitGtfs.Api.Service;
+namespace TransitGtfsApi.Service;
 
 public class RoutesService : MongoService<Models.Route>, IRoutesService
 {

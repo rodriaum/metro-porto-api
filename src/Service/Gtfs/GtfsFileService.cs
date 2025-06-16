@@ -1,7 +1,7 @@
-using TransitGtfs.Api.Interfaces.Gtfs;
+using TransitGtfsApi.Interfaces.Gtfs;
 using System.IO.Compression;
 
-namespace TransitGtfs.Api.Service.Gtfs;
+namespace TransitGtfsApi.Service.Gtfs;
 
 public class GtfsFileService : IGtfsFileService
 {

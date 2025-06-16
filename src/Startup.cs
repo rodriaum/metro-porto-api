@@ -4,16 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
-using TransitGtfs.Api.Filter;
-using TransitGtfs.Api.Interfaces;
-using TransitGtfs.Api.Interfaces.Database;
-using TransitGtfs.Api.Interfaces.Gtfs;
-using TransitGtfs.Api.Middleware;
-using TransitGtfs.Api.Service;
-using TransitGtfs.Api.Service.Database;
-using TransitGtfs.Api.Service.Gtfs;
+using TransitGtfsApi.Filter;
+using TransitGtfsApi.Interfaces;
+using TransitGtfsApi.Interfaces.Database;
+using TransitGtfsApi.Interfaces.Gtfs;
+using TransitGtfsApi.Middleware;
+using TransitGtfsApi.Service;
+using TransitGtfsApi.Service.Database;
+using TransitGtfsApi.Service.Gtfs;
 
-namespace TransitGtfs.Api;
+namespace TransitGtfsApi;
 
 public class Startup
 {

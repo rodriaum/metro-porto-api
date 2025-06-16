@@ -1,9 +1,9 @@
-using TransitGtfs.Api.Models;
-using TransitGtfs.Api.Filter;
-using TransitGtfs.Api.Interfaces.Gtfs;
+using TransitGtfsApi.Models;
+using TransitGtfsApi.Filter;
+using TransitGtfsApi.Interfaces.Gtfs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace TransitGtfs.Api.Controller.System;
+namespace TransitGtfsApi.Controller.System;
 
 [ApiController]
 [Route("api/v1/transit/gtfs")]

@@ -1,8 +1,8 @@
-﻿using TransitGtfs.Api.Interfaces.Database;
-using TransitGtfs.Api.Utils;
+﻿using TransitGtfsApi.Interfaces.Database;
+using TransitGtfsApi.Utils;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace TransitGtfs.Api.Service.Database
+namespace TransitGtfsApi.Service.Database
 {
     public class RedisService : IRedisService
     {

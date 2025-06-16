@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
-namespace TransitGtfs.Api.Middleware;
+namespace TransitGtfsApi.Middleware;
 
 public class ProtectionMiddleware
 {

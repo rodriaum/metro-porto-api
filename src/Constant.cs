@@ -1,4 +1,4 @@
-﻿namespace TransitGtfs.Api;
+﻿namespace TransitGtfsApi;
 
 public class Constant
 {

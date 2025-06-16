@@ -1,4 +1,4 @@
-namespace TransitGtfs.Api.Interfaces.Gtfs;
+namespace TransitGtfsApi.Interfaces.Gtfs;
 
 public interface IGtfsFileService
 {

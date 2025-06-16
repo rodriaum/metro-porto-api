@@ -1,4 +1,4 @@
-namespace TransitGtfs.Api.Models;
+namespace TransitGtfsApi.Models;
 
 public class Shape
 {

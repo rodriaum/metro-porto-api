@@ -1,4 +1,4 @@
-namespace TransitGtfs.Api.Models;
+namespace TransitGtfsApi.Models;
 public class StopTime
 {
     public string Id { get; set; }
