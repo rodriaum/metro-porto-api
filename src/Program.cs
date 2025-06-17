@@ -1,14 +1,33 @@
+using Serilog;
+
 namespace TransitGtfsApi;
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        CreateHostBuilder(args).Build().Run();
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
+
+        try
+        {
+            Log.Information("Starting web application");
+            CreateHostBuilder(args).Build().Run();
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Application terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .UseSerilog()
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>();
@@ -19,17 +38,7 @@ public class Program
                     options.Limits.MaxRequestBodySize = 10 * 1024; // 10 KB
                     options.Limits.MinRequestBodyDataRate = null;
                     options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
-
                     options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
                 });
-            })
-            .ConfigureLogging((hostingContext, logging) =>
-            {
-                logging.ClearProviders();
-                logging.AddConsole();
-                logging.AddDebug();
-
-                logging.AddFilter("Microsoft.AspNetCore.HttpOverrides", LogLevel.Warning);
-                logging.AddFilter("TransitGtfsApi.Middleware", LogLevel.Warning);
             });
 }

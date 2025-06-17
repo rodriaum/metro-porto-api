@@ -1,10 +1,14 @@
 using AspNetCoreRateLimit;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using Serilog;
 using TransitGtfsApi.Filter;
+using TransitGtfsApi.HealthChecks;
 using TransitGtfsApi.Interfaces;
 using TransitGtfsApi.Interfaces.Database;
 using TransitGtfsApi.Interfaces.Gtfs;
@@ -88,6 +92,8 @@ public class Startup
         ConfigureDatabaseServices(services);
         ConfigureCacheServices(services);
         ConfigureApplicationServices(services);
+        ConfigureSecurityServices(services);
+        ConfigureLogging(services);
     }
 
     private void ConfigureProtectionServices(IServiceCollection services)
@@ -108,10 +114,13 @@ public class Startup
         {
             options.EnableForHttps = true;
             options.Providers.Add<GzipCompressionProvider>();
+            options.Providers.Add<BrotliCompressionProvider>();
         });
 
         services.AddControllers(options =>
         {
+            options.Filters.Add<ValidateModelStateFilter>();
+            options.Filters.Add<SanitizeInputFilter>();
             options.CacheProfiles.Add("Default", new CacheProfile
             {
                 Duration = 60,
@@ -121,20 +130,86 @@ public class Startup
 
         services.AddResponseCaching();
 
-        // Swagger
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = $"{Constant.Name} API", Version = Constant.Version });
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
         });
 
         services.AddScoped<TokenAuthFilter>();
-
         services.AddHttpClient();
+    }
+
+    private void ConfigureSecurityServices(IServiceCollection services)
+    {
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.WithOrigins(Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
+                       .WithMethods(Configuration.GetSection("Cors:AllowedMethods").Get<string[]>() ?? Array.Empty<string>())
+                       .WithHeaders(Configuration.GetSection("Cors:AllowedHeaders").Get<string[]>() ?? Array.Empty<string>())
+                       .WithExposedHeaders(Configuration.GetSection("Cors:ExposedHeaders").Get<string[]>() ?? Array.Empty<string>())
+                       .SetPreflightMaxAge(TimeSpan.FromSeconds(Configuration.GetValue<int>("Cors:MaxAge", 3600)));
+            });
+        });
+
+        services.AddHealthChecks()
+            .AddCheck<SecurityHealthCheck>("security")
+            .AddCheck<RateLimitHealthCheck>("rate_limit")
+            .AddCheck<AuthenticationHealthCheck>("auth");
+    }
+
+    private void ConfigureLogging(IServiceCollection services)
+    {
+        services.AddLogging(builder =>
+        {
+            builder.AddSerilog(new LoggerConfiguration()
+                .ReadFrom.Configuration(Configuration)
+                .CreateLogger());
+        });
     }
 
     private void ConfigureDatabaseServices(IServiceCollection services)
     {
-        // MongoDB
         services.AddSingleton<IMongoClient>(sp =>
         {
             string? connection = Environment.GetEnvironmentVariable("MONGODB_CONNECTION");
@@ -143,12 +218,11 @@ public class Startup
             logger.LogInformation("Setting up MongoDB connection...");
 
             MongoClientSettings settings = MongoClientSettings.FromConnectionString(connection!);
-
             settings.MaxConnectionPoolSize = 1000;
             settings.MinConnectionPoolSize = 10;
             settings.WaitQueueSize = 10000;
 
-            return new MongoClient(connection);
+            return new MongoClient(settings);
         });
 
         services.AddSingleton(sp =>
@@ -164,7 +238,6 @@ public class Startup
 
     private void ConfigureCacheServices(IServiceCollection services)
     {
-        // Redis
         services.AddStackExchangeRedisCache(options =>
         {
             string? connection = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
@@ -209,6 +282,8 @@ public class Startup
             context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
             context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
             context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'");
+            context.Response.Headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+            context.Response.Headers.Append("X-Permitted-Cross-Domain-Policies", "none");
 
             context.Response.Headers.Remove("Server");
             context.Response.Headers.Remove("X-Powered-By");
@@ -231,6 +306,8 @@ public class Startup
             app.UseHsts();
         }
 
+        app.UseSerilogRequestLogging();
+        
         ConfigureSecurityHeaders(app);
 
         app.UseSwagger();
@@ -240,13 +317,19 @@ public class Startup
 
         app.UseHttpsRedirection();
         app.UseRouting();
+        
+        app.UseCors();
+        
+        app.UseAuthentication();
         app.UseAuthorization();
+        
         app.UseResponseCaching();
         app.UseResponseCompression();
 
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
+            endpoints.MapHealthChecks("/health");
         });
 
         InitializeDatabase(serviceProvider, logger);

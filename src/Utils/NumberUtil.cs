@@ -2,34 +2,42 @@
 
 public class NumberUtil
 {
-    public static int? ParseIntSafe(object? value, int? defaultValue = (int?)null)
+    public static int ParseIntSafe(object? value, int? defaultValue = null)
     {
-        if (value == null) return defaultValue;
+        if (value == null)
+            return defaultValue ?? 0;
 
         string? str = value.ToString();
 
-        return string.IsNullOrWhiteSpace(str) ? defaultValue : int.Parse(str);
+        if (string.IsNullOrWhiteSpace(str))
+            return defaultValue ?? 0;
+
+        return int.Parse(str);
     }
 
-    public static decimal? ParseDecimalSafe(object? value, decimal? defaultValue = (decimal?)null, IFormatProvider? format = null)
+    public static decimal ParseDecimalSafe(object? value, decimal? defaultValue = null, IFormatProvider? format = null)
     {
-        if (value == null) return defaultValue;
+        if (value == null)
+            return defaultValue ?? 0;
 
         string? str = value.ToString();
 
-        return string.IsNullOrWhiteSpace(str)
-            ? defaultValue
-            : decimal.Parse(str, format);
+        if (string.IsNullOrWhiteSpace(str))
+            return defaultValue ?? 0;
+
+        return decimal.Parse(str, format);
     }
 
-    public static double? ParseDoubleSafe(object? value, double? defaultValue = (double?)null, IFormatProvider? format = null)
+    public static double ParseDoubleSafe(object? value, double? defaultValue = null, IFormatProvider? format = null)
     {
-        if (value == null) return defaultValue;
+        if (value == null)
+            return defaultValue ?? 0;
 
         string? str = value.ToString();
 
-        return string.IsNullOrWhiteSpace(str)
-            ? defaultValue
-            : double.Parse(str, format);
+        if (string.IsNullOrWhiteSpace(str))
+            return defaultValue ?? 0;
+
+        return double.Parse(str, format);
     }
 }

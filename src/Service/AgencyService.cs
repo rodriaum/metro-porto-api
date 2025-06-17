@@ -42,7 +42,10 @@ public class AgencyService : MongoService<Agency>, IAgencyService
             AgencyName = fields.GetValueOrDefault("agency_name", "") ?? "",
             AgencyUrl = fields.GetValueOrDefault("agency_url", "") ?? "",
             AgencyTimezone = fields.GetValueOrDefault("agency_timezone", "") ?? "",
-            AgencyLang = fields.GetValueOrDefault("agency_lang", "") ?? ""
+            AgencyLang = fields.GetValueOrDefault("agency_lang", "") ?? "",
+            AgencyPhone = fields.GetValueOrDefault("agency_phone", "") ?? "",
+            AgencyFareUrl = fields.GetValueOrDefault("agency_fare_url", "") ?? "",
+            AgencyEmail = fields.GetValueOrDefault("agency_email", "") ?? ""
         });
     }
 }

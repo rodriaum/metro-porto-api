@@ -1,9 +1,10 @@
+using MongoDB.Driver;
+using TransitGtfsApi.Enums;
 using TransitGtfsApi.Interfaces;
 using TransitGtfsApi.Interfaces.Database;
 using TransitGtfsApi.Models;
 using TransitGtfsApi.Service.Database;
 using TransitGtfsApi.Utils;
-using MongoDB.Driver;
 
 namespace TransitGtfsApi.Service;
 
@@ -36,12 +37,30 @@ public class CalendarDatesService : MongoService<CalendarDate>, ICalendarDatesSe
     public async Task ImportDataAsync(string directoryPath)
     {
         string filePath = Path.Combine(directoryPath, "calendar_dates.txt");
-        await ImportFromCsvAsync(filePath, fields => new CalendarDate
+
+        if (!File.Exists(filePath))
         {
-            Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            ServiceId = fields.GetValueOrDefault("service_id", "") ?? "",
-            Date = fields.GetValueOrDefault("date", "") ?? "",
-            ExceptionType = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("exception_type", null))
+            _logger.LogWarning("File not found: {FilePath}", filePath);
+            return;
+        }
+
+        await ImportFromCsvAsync(filePath, fields =>
+        {
+            int exceptionId = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("exception_type", null), -1);
+
+            if (!EnumUtil.TryFromValue(exceptionId, out ExceptionType exceptionType))
+            {
+                _logger.LogWarning("Invalid exception type: {ExceptionId}", exceptionId);
+                return null;
+            }
+
+            return new CalendarDate
+            {
+                Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
+                ServiceId = fields.GetValueOrDefault("service_id", "") ?? "",
+                Date = fields.GetValueOrDefault("date", "") ?? "",
+                ExceptionType = exceptionType
+            };
         });
     }
 }

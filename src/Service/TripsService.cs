@@ -1,9 +1,10 @@
+using MongoDB.Driver;
+using TransitGtfsApi.Enums;
 using TransitGtfsApi.Interfaces;
 using TransitGtfsApi.Interfaces.Database;
 using TransitGtfsApi.Models;
 using TransitGtfsApi.Service.Database;
 using TransitGtfsApi.Utils;
-using MongoDB.Driver;
 
 namespace TransitGtfsApi.Service;
 
@@ -81,17 +82,31 @@ public class TripsService : MongoService<Trip>, ITripsService
     {
         string filePath = Path.Combine(directoryPath, "trips.txt");
 
-        await ImportFromCsvAsync(filePath, fields => new Trip
+        if (!File.Exists(filePath))
         {
-            Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
-            RouteId = fields.GetValueOrDefault("route_id", "") ?? "",
-            ServiceId = fields.GetValueOrDefault("service_id", "") ?? "",
-            TripId = fields.GetValueOrDefault("trip_id", "") ?? "",
-            TripHeadsign = fields.GetValueOrDefault("trip_headsign", "") ?? "",
-            WheelchairAccessible = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("wheelchair_accessible", null)),
-            DirectionId = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("direction_id", null)),
-            BlockId = fields.GetValueOrDefault("block_id", "") ?? "",
-            ShapeId = fields.GetValueOrDefault("shape_id", "") ?? ""
+            _logger.LogWarning("File not found: {FilePath}", filePath);
+            return;
+        }
+
+        await ImportFromCsvAsync(filePath, fields =>
+        {
+            int wheelchairAccessibleId = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("wheelchair_accessible", null), -1);
+            int directionId = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("direction_id", null), -1);
+            int bikesAllowedId = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("bikes_allowed", null), -1);
+
+            return new Trip
+            {
+                Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
+                RouteId = fields.GetValueOrDefault("route_id", "") ?? "",
+                ServiceId = fields.GetValueOrDefault("service_id", "") ?? "",
+                TripId = fields.GetValueOrDefault("trip_id", "") ?? "",
+                TripHeadsign = fields.GetValueOrDefault("trip_headsign", "") ?? "",
+                WheelchairAccessible = wheelchairAccessibleId != -1 ? EnumUtil.FromValue<TrinaryOption>(wheelchairAccessibleId) : null,
+                DirectionId = directionId != -1 ? EnumUtil.FromValue<DirectionType>(directionId) : null,
+                BlockId = fields.GetValueOrDefault("block_id", "") ?? "",
+                ShapeId = fields.GetValueOrDefault("shape_id", "") ?? "",
+                BikesAllowed = bikesAllowedId != -1 ? EnumUtil.FromValue<TrinaryOption>(bikesAllowedId) : null,
+            };
         });
     }
 }

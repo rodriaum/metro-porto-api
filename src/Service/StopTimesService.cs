@@ -5,6 +5,7 @@ using TransitGtfsApi.Service.Database;
 using TransitGtfsApi.Utils;
 using MongoDB.Driver;
 using System.Globalization;
+using TransitGtfsApi.Enums;
 
 namespace TransitGtfsApi.Service;
 
@@ -57,10 +58,23 @@ public class StopTimesService : MongoService<StopTime>, IStopTimesService
         ) ?? new List<StopTime>();
     }
 
-    public async Task ImportDataAsync(string directoryPath)
+public async Task ImportDataAsync(string directoryPath)
+{
+    string filePath = Path.Combine(directoryPath, "stop_times.txt");
+    
+    if (!File.Exists(filePath))
     {
-        string filePath = Path.Combine(directoryPath, "stop_times.txt");
-        await ImportFromCsvAsync(filePath, fields => new StopTime
+        _logger.LogWarning("File not found: {FilePath}", filePath);
+        return;
+    }
+    
+    await ImportFromCsvAsync(filePath, fields =>
+    {
+        int pickupTypeId = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("pickup_type", null), -1);
+        int dropOffTypeId = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("drop_off_type", null), -1);
+        int timepointId = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("timepoint", null), -1);
+        
+        return new StopTime
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
             TripId = fields.GetValueOrDefault("trip_id", "") ?? "",
@@ -69,9 +83,11 @@ public class StopTimesService : MongoService<StopTime>, IStopTimesService
             StopId = fields.GetValueOrDefault("stop_id", "") ?? "",
             StopSequence = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("stop_sequence", null)),
             StopHeadsign = fields.GetValueOrDefault("stop_headsign", "") ?? "",
-            PickupType = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("pickup_type", null)),
-            DropOffType = NumberUtil.ParseIntSafe(fields.GetValueOrDefault("drop_off_type", null)),
+            PickupType = pickupTypeId != -1 ? EnumUtil.FromValue<PickupType>(pickupTypeId) : null,
+            DropOffType = dropOffTypeId,
             ShapeDistTraveled = NumberUtil.ParseDoubleSafe(fields.GetValueOrDefault("shape_dist_traveled", null), format: CultureInfo.InvariantCulture),
-        });
-    }
+            Timepoint = timepointId != -1 ? EnumUtil.FromValue<TimepointType>(timepointId) : null
+        };
+    });
+}
 }
